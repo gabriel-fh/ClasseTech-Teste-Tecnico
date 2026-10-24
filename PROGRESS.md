@@ -17,7 +17,7 @@ Sábado 24/10
 - [x] Banco aberto pelo `SQLiteProvider` com `Suspense` e MMKV configurado (b669fdd)
 - [x] Identidade nativa do app e scripts de build local (6bcaf63, 315c3e8)
 - [x] 44 testes passando, `typecheck`, `lint` e `expo-doctor` limpos
-- [x] `npx expo prebuild --platform android` rodando e `expo-doctor` com 20 de 20 checagens limpas
+- [x] `npx expo prebuild --platform android` rodado, `expo-doctor` com 20 de 20 checagens limpas e `expo export --platform android` gerando o bundle sem erro
 
 ## Pendente
 
