@@ -5,58 +5,58 @@ export const DATABASE_NAME = 'classetech.db';
 const DATABASE_VERSION = 1;
 
 const SCHEMA_V1 = `
-CREATE TABLE pessoas (
+CREATE TABLE people (
   id TEXT PRIMARY KEY NOT NULL,
-  tipo TEXT NOT NULL CHECK (tipo IN ('PF', 'PJ')),
-  nome TEXT,
+  type TEXT NOT NULL CHECK (type IN ('PF', 'PJ')),
+  name TEXT,
   cpf TEXT UNIQUE,
   rg TEXT,
-  orgao_emissor TEXT,
-  data_nascimento TEXT,
-  estado_civil TEXT,
-  profissao TEXT,
-  nacionalidade TEXT,
-  razao_social TEXT,
-  nome_fantasia TEXT,
+  rg_issuer TEXT,
+  birth_date TEXT,
+  marital_status TEXT,
+  occupation TEXT,
+  nationality TEXT,
+  legal_name TEXT,
+  trade_name TEXT,
   cnpj TEXT UNIQUE,
-  inscricao_estadual TEXT,
-  data_abertura TEXT,
+  state_registration TEXT,
+  foundation_date TEXT,
   email TEXT NOT NULL,
-  telefone TEXT NOT NULL,
+  phone TEXT NOT NULL,
   cep TEXT NOT NULL,
-  logradouro TEXT NOT NULL,
-  numero TEXT NOT NULL,
-  complemento TEXT,
-  bairro TEXT NOT NULL,
-  cidade TEXT NOT NULL,
+  street TEXT NOT NULL,
+  number TEXT NOT NULL,
+  complement TEXT,
+  district TEXT NOT NULL,
+  city TEXT NOT NULL,
   uf TEXT NOT NULL,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
 
-CREATE TABLE representantes (
+CREATE TABLE representatives (
   id TEXT PRIMARY KEY NOT NULL,
-  pessoa_id TEXT NOT NULL UNIQUE REFERENCES pessoas (id) ON DELETE CASCADE,
-  nome TEXT NOT NULL,
+  person_id TEXT NOT NULL UNIQUE REFERENCES people (id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
   cpf TEXT NOT NULL,
-  cargo TEXT NOT NULL,
+  role TEXT NOT NULL,
   email TEXT NOT NULL,
-  telefone TEXT NOT NULL
+  phone TEXT NOT NULL
 );
 
-CREATE TABLE documentos (
+CREATE TABLE documents (
   id TEXT PRIMARY KEY NOT NULL,
-  pessoa_id TEXT NOT NULL REFERENCES pessoas (id) ON DELETE CASCADE,
-  tipo TEXT NOT NULL,
-  nome_arquivo TEXT NOT NULL,
+  person_id TEXT NOT NULL REFERENCES people (id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
+  file_name TEXT NOT NULL,
   uri TEXT NOT NULL,
   mime_type TEXT NOT NULL,
-  tamanho INTEGER NOT NULL,
+  size INTEGER NOT NULL,
   created_at TEXT NOT NULL
 );
 
-CREATE INDEX documentos_pessoa_id_idx ON documentos (pessoa_id);
-CREATE INDEX pessoas_created_at_idx ON pessoas (created_at DESC);
+CREATE INDEX documents_person_id_idx ON documents (person_id);
+CREATE INDEX people_created_at_idx ON people (created_at DESC);
 `;
 
 export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
