@@ -26,7 +26,7 @@ Sábado 24/10
 - [ ] Fase 5: detalhe, edição e exclusão
 - [ ] Instalar `react-hook-form`, `@hookform/resolvers` e `@tanstack/react-query` quando a fase 3 começar
 - [ ] Instalar `expo-image-picker`, `expo-document-picker` e `expo-file-system` na fase 6; `expo-local-authentication` na 7; `expo-print` e `expo-sharing` na 8. Cada um desses exige um novo build nativo
-- [ ] Primeiro build local de debug do Android (`./gradlew assembleDebug`) ainda rodando
+- [ ] Primeiro build local de debug do Android: falhou no limite de caminho do Windows, em teste pelo atalho `C:\ct`
 - [ ] A tela inicial ainda é a do template
 
 ## Problemas e decisões
@@ -38,6 +38,8 @@ Sábado 24/10
 - Filtro de documentação pendente é aplicado em memória, depois da consulta. Busca e tipo vão no SQL
 - Busca por nome usa `LIKE`, que no SQLite não ignora acento. Procurar "Jose" não acha "José"
 - `expo-crypto` entrou para gerar o uuid dos registros
+- O `assembleDebug` falhou compilando o C++ do `react-native-nitro-modules`, que o `react-native-mmkv` 4 exige: `ninja: error: mkdir(CMakeFiles/NitroModules.dir/C_/Users/Gabriel/...): No such file or directory`. O ninja repete o caminho de origem inteiro dentro de `CMakeFiles`, e com o projeto em `C:\Users\Gabriel\Documents\testes\ClasseTech-Teste-Tecnico` (57 caracteres) isso passa dos 260 do MAX_PATH. `LongPathsEnabled` está em 0 nesta máquina
+- Contorno em teste: junção `C:\ct` apontando para a pasta do projeto (`mklink /J`), com o Gradle rodando por ela. Se não resolver, as saídas são habilitar `LongPathsEnabled` no registro (precisa de admin e de reinício) ou trocar o MMKV pelo `expo-sqlite/kv-store`, que elimina o nitro-modules e não acrescenta dependência nativa
 
 ## Para o Gabriel testar no celular
 
