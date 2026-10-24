@@ -6,7 +6,6 @@
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
   },
-  "tailwindCSS.experimental.configFile": "src/global.css",
   "tailwindCSS.classAttributes": ["class", "className"],
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",

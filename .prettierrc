@@ -8,6 +8,6 @@
   "bracketSameLine": false,
   "endOfLine": "lf",
   "plugins": ["prettier-plugin-tailwindcss"],
-  "tailwindStylesheet": "./src/global.css",
-  "tailwindFunctions": ["clsx", "cn", "cva", "twMerge"]
+  "tailwindFunctions": ["clsx", "cn", "cva", "twMerge"],
+  "tailwindConfig": "./tailwind.config.js"
 }
