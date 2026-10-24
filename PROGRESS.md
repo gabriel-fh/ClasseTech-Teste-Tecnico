@@ -26,7 +26,7 @@ Sábado 24/10
 - [ ] Fase 5: detalhe, edição e exclusão
 - [ ] Instalar `react-hook-form`, `@hookform/resolvers` e `@tanstack/react-query` quando a fase 3 começar
 - [ ] Instalar `expo-image-picker`, `expo-document-picker` e `expo-file-system` na fase 6; `expo-local-authentication` na 7; `expo-print` e `expo-sharing` na 8. Cada um desses exige um novo build nativo
-- [ ] Primeiro build local de debug do Android: falhou no limite de caminho do Windows, em teste pelo atalho `C:\ct`
+- [ ] Primeiro build local de debug do Android: bloqueado pelo limite de caminho do Windows, aguardando decisão
 - [ ] A tela inicial ainda é a do template
 
 ## Problemas e decisões
@@ -39,12 +39,15 @@ Sábado 24/10
 - Busca por nome usa `LIKE`, que no SQLite não ignora acento. Procurar "Jose" não acha "José"
 - `expo-crypto` entrou para gerar o uuid dos registros
 - O `assembleDebug` falhou compilando o C++ do `react-native-nitro-modules`, que o `react-native-mmkv` 4 exige: `ninja: error: mkdir(CMakeFiles/NitroModules.dir/C_/Users/Gabriel/...): No such file or directory`. O ninja repete o caminho de origem inteiro dentro de `CMakeFiles`, e com o projeto em `C:\Users\Gabriel\Documents\testes\ClasseTech-Teste-Tecnico` (57 caracteres) isso passa dos 260 do MAX_PATH. `LongPathsEnabled` está em 0 nesta máquina
-- Contorno em teste: junção `C:\ct` apontando para a pasta do projeto (`mklink /J`), com o Gradle rodando por ela. Se não resolver, as saídas são habilitar `LongPathsEnabled` no registro (precisa de admin e de reinício) ou trocar o MMKV pelo `expo-sqlite/kv-store`, que elimina o nitro-modules e não acrescenta dependência nativa
+- A junção `C:\ct` (`mklink /J`) não resolveu e foi removida: o CMake resolve o link para o caminho real e grava ele inteiro dentro de `CMakeFiles`. Com ela o nitro-modules passou, mas o `react-native-worklets` quebrou no mesmo erro, agora em `CMakeFiles/worklets.dir/C_/Users/Gabriel/.../react-native-worklets/Common/cpp`. O arquivo mais fundo dá 275 caracteres, 15 acima do limite
+- Três saídas, nenhuma escolhida ainda:
+  1. Mover o repositório para um caminho curto, por exemplo `C:\dev\classetech`. Economiza cerca de 100 caracteres, não precisa de admin nem de reinício. É a mais garantida
+  2. Habilitar `LongPathsEnabled` no registro (admin e reinício). Menos garantido: o ninja e o Gradle ainda podem não respeitar a flag
+  3. Remover `react-native-reanimated` e `react-native-worklets`, que vieram do template e o app não usa. Mais rápido, mas outro módulo C++ pode cair no mesmo problema depois
 
 ## Para o Gabriel testar no celular
 
-- Instalar o APK de debug em `android/app/build/outputs/apk/debug/app-debug.apk`, rodar `npx expo start --dev-client` e conferir que o app abre sem travar na tela de carregamento. É isso que prova que o banco foi criado e a migration rodou
-- Não tem tela ainda, então o teste é só esse: abrir sem erro
+- Nada ainda: o APK não saiu. O teste no celular depende de resolver o limite de caminho primeiro
 
 ## Próximo passo exato
 
