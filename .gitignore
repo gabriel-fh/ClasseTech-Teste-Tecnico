@@ -44,3 +44,9 @@ example
 
 # IDEs
 .idea/
+
+# testes
+coverage/
+
+# spec interna (nao vai para o repositorio)
+SPEC.md
