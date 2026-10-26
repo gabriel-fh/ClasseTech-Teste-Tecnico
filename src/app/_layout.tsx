@@ -1,14 +1,23 @@
 import '@/global.css';
 
+import {
+  Archivo_400Regular,
+  Archivo_500Medium,
+  Archivo_600SemiBold,
+} from '@expo-google-fonts/archivo';
+import { Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { DATABASE_NAME, migrateDatabase } from '@/lib/db';
 
-// CEP e CNPJ não mudam, então ficam em cache pela sessão inteira e não são refeitos sozinhos.
+SplashScreen.preventAutoHideAsync();
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -22,21 +31,47 @@ const queryClient = new QueryClient({
 
 function LoadingScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <ActivityIndicator />
+    <View className="flex-1 items-center justify-center bg-paper-50">
+      <ActivityIndicator color="#163a5c" />
     </View>
   );
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Archivo_400Regular,
+    Archivo_500Medium,
+    Archivo_600SemiBold,
+    Fraunces_600SemiBold,
+    Fraunces_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <Suspense fallback={<LoadingScreen />}>
       <QueryClientProvider client={queryClient}>
         <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDatabase} useSuspense>
-          <Stack screenOptions={{ headerTitleStyle: { fontSize: 17 } }}>
+          <Stack
+            screenOptions={{
+              headerShadowVisible: false,
+              headerStyle: { backgroundColor: '#fcfbf8' },
+              headerTintColor: '#163a5c',
+              headerTitleStyle: { fontFamily: 'Fraunces_600SemiBold', fontSize: 18 },
+              contentStyle: { backgroundColor: '#fcfbf8' },
+            }}
+          >
             <Stack.Screen name="index" options={{ title: 'Cadastros' }} />
             <Stack.Screen name="person/new" options={{ title: 'Novo cadastro' }} />
-            <Stack.Screen name="person/[id]" options={{ title: 'Cadastro' }} />
+            <Stack.Screen name="person/[id]" options={{ title: 'Ficha' }} />
           </Stack>
         </SQLiteProvider>
       </QueryClientProvider>

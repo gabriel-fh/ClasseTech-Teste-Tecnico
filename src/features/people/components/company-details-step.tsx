@@ -43,13 +43,15 @@ export function CompanyDetailsStep({ form }: { form: PersonFormApi }) {
 
         {cnpj.loading ? (
           <View className="flex-row items-center gap-2">
-            <ActivityIndicator size="small" color="#737373" />
-            <Text className="text-sm text-neutral-500">Buscando dados na Receita...</Text>
+            <ActivityIndicator size="small" color="#8c8373" />
+            <Text className="font-body text-sm leading-5 text-ink-400">
+              Buscando dados na Receita...
+            </Text>
           </View>
         ) : null}
 
         {cnpj.notFound ? (
-          <Text className="text-sm text-amber-600">
+          <Text className="text-sm text-ochre-700">
             Não achamos este CNPJ. Preencha os dados manualmente.
           </Text>
         ) : null}

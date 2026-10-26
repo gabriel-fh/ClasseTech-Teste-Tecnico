@@ -8,7 +8,6 @@ interface FormTextFieldProps<T extends FieldValues> extends Omit<
 > {
   control: Control<T>;
   name: FieldPath<T>;
-  /** Máscara progressiva aplicada a cada tecla, por exemplo `maskCpf`. */
   mask?: (value: string) => string;
 }
 

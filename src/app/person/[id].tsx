@@ -107,15 +107,15 @@ export default function PersonDetailScreen() {
 
   if (query.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator />
+      <View className="flex-1 items-center justify-center bg-paper-50">
+        <ActivityIndicator color="#163a5c" />
       </View>
     );
   }
 
   if (query.isError || !query.data) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
+      <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
         <EmptyState
           title="Cadastro não encontrado"
           message="Ele pode ter sido excluído neste aparelho."
@@ -127,10 +127,10 @@ export default function PersonDetailScreen() {
   const { person, status } = query.data;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-4 p-4 pb-10">
         <View className="gap-2">
-          <Text className="text-2xl font-bold text-neutral-900">{personDisplayName(person)}</Text>
+          <Text className="font-display text-2xl text-ink-900">{personDisplayName(person)}</Text>
           <View className="flex-row flex-wrap gap-2">
             <Badge label={PERSON_TYPE_LABELS[person.type]} />
             <Badge
@@ -141,15 +141,22 @@ export default function PersonDetailScreen() {
         </View>
 
         {sectionsFor(person).map((section) => (
-          <View key={section.title} className="gap-3 rounded-2xl border border-neutral-200 p-4">
-            <Text className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+          <View
+            key={section.title}
+            className="gap-3 rounded-card border border-paper-300 bg-paper-50 p-4"
+          >
+            <Text className="font-body-semibold text-[11px] uppercase tracking-[1.4px] text-ink-400">
               {section.title}
             </Text>
 
             {section.rows.map((row) => (
               <View key={row.label} className="gap-0.5">
-                <Text className="text-xs text-neutral-500">{row.label}</Text>
-                <Text className="text-base text-neutral-900">{row.value || 'Não informado'}</Text>
+                <Text className="font-body-medium text-[11px] uppercase tracking-[1px] text-ink-400">
+                  {row.label}
+                </Text>
+                <Text className="font-body text-base text-ink-900">
+                  {row.value || 'Não informado'}
+                </Text>
               </View>
             ))}
           </View>

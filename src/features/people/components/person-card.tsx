@@ -19,20 +19,22 @@ export function PersonCard({ person, onPress }: PersonCardProps) {
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      className="gap-2 rounded-2xl border border-neutral-200 bg-white p-4 active:bg-neutral-50"
+      className="gap-3 rounded-card border border-paper-300 bg-paper-50 p-4 active:bg-paper-100"
     >
       <View className="flex-row items-start justify-between gap-3">
-        <Text className="flex-1 text-base font-semibold text-neutral-900" numberOfLines={2}>
+        <Text className="flex-1 font-display text-[17px] leading-6 text-ink-900" numberOfLines={2}>
           {person.name}
         </Text>
         <Badge label={PERSON_TYPE_LABELS[person.type]} />
       </View>
 
-      <Text className="text-sm text-neutral-600">{document}</Text>
+      <Text className="font-body-medium text-[15px] tracking-wide text-ink-700">{document}</Text>
+
+      <View className="h-px bg-paper-200" />
 
       <View className="flex-row items-center justify-between gap-3">
-        <Text className="flex-1 text-sm text-neutral-500" numberOfLines={1}>
-          {person.city} - {person.uf}
+        <Text className="flex-1 font-body text-sm text-ink-400" numberOfLines={1}>
+          {person.city} / {person.uf}
         </Text>
         <Badge label={person.status.label} tone={person.status.complete ? 'success' : 'warning'} />
       </View>

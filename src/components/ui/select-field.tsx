@@ -35,36 +35,39 @@ export function SelectField<T extends string>({
 
   return (
     <View className="gap-1.5">
-      <Text className="text-sm font-medium text-neutral-700">{label}</Text>
+      <Text className="font-body-medium text-xs uppercase tracking-[1.2px] text-ink-500">
+        {label}
+      </Text>
 
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
         onPress={() => setOpen(true)}
-        className={`h-12 flex-row items-center justify-between rounded-xl border bg-white px-4 active:bg-neutral-50 ${
-          error ? 'border-red-500' : 'border-neutral-300'
+        className={`h-12 flex-row items-center justify-between rounded-field border bg-paper-50 px-3.5 active:bg-paper-100 ${
+          error ? 'border-brick-700' : 'border-paper-300'
         }`}
       >
-        <Text className={`text-base ${selected ? 'text-neutral-900' : 'text-neutral-400'}`}>
+        <Text className={`font-body text-base ${selected ? 'text-ink-900' : 'text-ink-300'}`}>
           {selected?.label ?? placeholder}
         </Text>
-        <Text className="text-xs text-neutral-500">▼</Text>
+        <Text className="font-body text-[10px] text-ink-400">▼</Text>
       </Pressable>
 
-      {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
+      {error ? <Text className="font-body text-sm text-brick-700">{error}</Text> : null}
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={close}>
-          <Pressable className="max-h-[60%] rounded-t-3xl bg-white pb-6 pt-2">
+        <Pressable className="flex-1 justify-end bg-ink-900/50" onPress={close}>
+          <Pressable className="max-h-[60%] rounded-t-card border-t border-paper-300 bg-paper-50 pb-6 pt-2">
             <View className="items-center py-2">
-              <View className="h-1 w-10 rounded-full bg-neutral-300" />
+              <View className="h-1 w-9 rounded-full bg-paper-300" />
             </View>
 
-            <Text className="px-5 pb-2 text-base font-semibold text-neutral-900">{label}</Text>
+            <Text className="px-5 pb-2 font-display-medium text-base text-ink-900">{label}</Text>
 
             <FlatList
               data={options}
               keyExtractor={(option) => option.value}
+              ItemSeparatorComponent={() => <View className="mx-5 h-px bg-paper-200" />}
               renderItem={({ item }) => (
                 <Pressable
                   accessibilityRole="button"
@@ -72,11 +75,11 @@ export function SelectField<T extends string>({
                     onChange(item.value);
                     close();
                   }}
-                  className="flex-row items-center justify-between px-5 py-4 active:bg-neutral-100"
+                  className="flex-row items-center justify-between px-5 py-3.5 active:bg-paper-100"
                 >
-                  <Text className="text-base text-neutral-900">{item.label}</Text>
+                  <Text className="font-body text-base text-ink-900">{item.label}</Text>
                   {item.value === value ? (
-                    <Text className="text-base font-bold text-primary-600">✓</Text>
+                    <Text className="font-body-semibold text-base text-accent-700">✓</Text>
                   ) : null}
                 </Pressable>
               )}

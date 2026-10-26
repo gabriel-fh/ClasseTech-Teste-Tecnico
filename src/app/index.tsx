@@ -29,7 +29,6 @@ export default function HomeScreen() {
 
   const { refetch } = query;
 
-  // A lista é relida ao voltar do wizard, do detalhe e da edição.
   useFocusEffect(
     useCallback(() => {
       void refetch();
@@ -44,8 +43,8 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
-      <View className="gap-3 border-b border-neutral-200 px-4 pb-3 pt-2">
+    <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
+      <View className="gap-3 border-b border-paper-200 px-4 pb-4 pt-1">
         <TextField
           label="Buscar"
           value={search}
@@ -68,7 +67,7 @@ export default function HomeScreen() {
 
       {query.isPending ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
+          <ActivityIndicator color="#163a5c" />
         </View>
       ) : query.isError ? (
         <EmptyState
@@ -106,7 +105,7 @@ export default function HomeScreen() {
           }
           ListFooterComponent={
             people.length > 0 ? (
-              <Text className="pt-2 text-center text-xs text-neutral-400">
+              <Text className="pt-3 text-center font-body-medium text-[11px] uppercase tracking-[1.4px] text-ink-300">
                 {people.length} {people.length === 1 ? 'cadastro' : 'cadastros'}
               </Text>
             ) : undefined
@@ -114,7 +113,7 @@ export default function HomeScreen() {
         />
       )}
 
-      <View className="absolute inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4">
+      <View className="absolute inset-x-0 bottom-0 border-t border-paper-200 bg-paper-50 p-4">
         <Button label="Novo cadastro" onPress={() => router.push('/person/new')} />
       </View>
     </SafeAreaView>

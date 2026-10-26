@@ -9,7 +9,7 @@ import type { PersonFormApi } from '../use-person-form';
 export function RepresentativeStep({ control }: { control: PersonFormApi['control'] }) {
   return (
     <View className="gap-4">
-      <Text className="text-sm text-neutral-500">
+      <Text className="font-body text-sm leading-5 text-ink-400">
         Quem assina pela empresa no contrato de locação.
       </Text>
 

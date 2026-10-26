@@ -1,10 +1,5 @@
 import { isoToBrazilianDate, normalizeCnpj, onlyDigits } from './validators';
 
-/**
- * CEP e CNPJ são ajuda de preenchimento, nunca bloqueio: qualquer falha de rede ou resposta
- * inesperada vira `null`, e a tela segue aceitando o preenchimento manual.
- */
-
 const TIMEOUT_MS = 8000;
 
 export interface CepAddress {
@@ -123,7 +118,7 @@ export async function fetchAddressByCep(cep: string): Promise<CepAddress | null>
 }
 
 export async function fetchCompanyByCnpj(cnpj: string): Promise<CompanyData | null> {
-  // A BrasilAPI ainda não atende o CNPJ alfanumérico da Receita, então só os numéricos vão.
+  // A BrasilAPI ainda não atende o CNPJ alfanumérico da Receita.
   const digits = normalizeCnpj(cnpj);
 
   if (!/^\d{14}$/.test(digits)) {

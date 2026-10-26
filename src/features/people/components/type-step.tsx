@@ -13,8 +13,8 @@ export function TypeStep({ value, onChange }: TypeStepProps) {
   return (
     <View className="gap-6">
       <View className="gap-2">
-        <Text className="text-xl font-bold text-neutral-900">Quem você vai cadastrar?</Text>
-        <Text className="text-sm text-neutral-500">
+        <Text className="font-display text-xl text-ink-900">Quem você vai cadastrar?</Text>
+        <Text className="font-body text-sm leading-5 text-ink-400">
           O tipo define quais dados e documentos serão pedidos nas próximas etapas.
         </Text>
       </View>

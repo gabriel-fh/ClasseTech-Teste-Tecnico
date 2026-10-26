@@ -8,21 +8,19 @@ interface StepProgressProps {
 
 export function StepProgress({ current, total, label }: StepProgressProps) {
   return (
-    <View className="gap-2">
+    <View className="gap-2.5">
       <View className="flex-row items-baseline justify-between">
-        <Text className="text-sm font-semibold text-neutral-900">{label}</Text>
-        <Text className="text-xs text-neutral-500">
-          Etapa {current} de {total}
+        <Text className="font-display-medium text-base text-ink-900">{label}</Text>
+        <Text className="font-body-medium text-[11px] uppercase tracking-[1px] text-ink-400">
+          {current} de {total}
         </Text>
       </View>
 
-      <View className="h-2 flex-row gap-1">
+      <View className="flex-row gap-1.5">
         {Array.from({ length: total }, (_, index) => (
           <View
             key={index}
-            className={`h-2 flex-1 rounded-full ${
-              index < current ? 'bg-primary-600' : 'bg-neutral-200'
-            }`}
+            className={`h-0.5 flex-1 ${index < current ? 'bg-accent-700' : 'bg-paper-300'}`}
           />
         ))}
       </View>

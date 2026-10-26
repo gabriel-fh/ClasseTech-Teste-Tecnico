@@ -4,12 +4,6 @@ import { useForm, type Resolver, type UseFormReturn } from 'react-hook-form';
 import { emptyPersonFormValues, personFormSchemaFor, type PersonFormValues } from './schema';
 
 export type PersonFormApi = UseFormReturn<PersonFormValues>;
-
-/**
- * O schema é escolhido a cada validação pelo `type` que está no próprio formulário, porque
- * o wizard decide entre pessoa física e jurídica na primeira etapa. `z.object` descarta as
- * chaves do outro tipo, então os campos não usados ficam de fora sem gerar erro.
- */
 const resolver: Resolver<PersonFormValues> = (values, context, options) => {
   const schema = personFormSchemaFor(values.type);
 

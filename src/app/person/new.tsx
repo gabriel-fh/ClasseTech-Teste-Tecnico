@@ -48,7 +48,6 @@ const TITLES: Record<StepId, string> = {
   review: 'Revisão',
 };
 
-/** Campos validados antes de sair de cada etapa. */
 function fieldsOf(step: StepId, type: PersonType): readonly string[] {
   switch (step) {
     case 'details':
@@ -70,8 +69,7 @@ export default function NewPersonScreen() {
   const [typeChosen, setTypeChosen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // O rascunho é lido uma vez, na montagem. `ready` segura a gravação até o usuário decidir
-  // se retoma o que estava salvo, para não sobrescrever o rascunho antes da resposta.
+  // `ready` segura a gravação até o usuário responder, para não sobrescrever o rascunho salvo.
   const [savedDraft] = useState<PersonDraft | null>(() => {
     const draft = readDraft();
 
@@ -179,7 +177,7 @@ export default function NewPersonScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -208,7 +206,7 @@ export default function NewPersonScreen() {
           {step === 'review' ? <ReviewStep values={form.watch()} /> : null}
         </ScrollView>
 
-        <View className="flex-row gap-3 border-t border-neutral-200 bg-white p-4">
+        <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
           <View className="flex-1">
             <Button label="Voltar" variant="secondary" onPress={goBack} disabled={saving} />
           </View>

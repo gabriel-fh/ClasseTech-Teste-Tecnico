@@ -1,7 +1,4 @@
-/**
- * O react-native-mmkv é nativo e não carrega no Jest: o módulo Nitro não existe fora do app.
- * Este mock guarda tudo em memória, com a mesma API da versão 4 (`createMMKV`, `remove`).
- */
+// O módulo nativo não carrega no Jest. Mesma API da versão 4, em memória.
 function createMMKV() {
   const store = new Map();
 

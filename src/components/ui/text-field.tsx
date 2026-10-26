@@ -11,21 +11,23 @@ export function TextField({ label, error, hint, ...props }: TextFieldProps) {
 
   return (
     <View className="gap-1.5">
-      <Text className="text-sm font-medium text-neutral-700">{label}</Text>
+      <Text className="font-body-medium text-xs uppercase tracking-[1.2px] text-ink-500">
+        {label}
+      </Text>
 
       <TextInput
         accessibilityLabel={label}
-        placeholderTextColor="#a3a3a3"
-        className={`h-12 rounded-xl border bg-white px-4 text-base text-neutral-900 ${
-          invalid ? 'border-red-500' : 'border-neutral-300'
+        placeholderTextColor="#b2a998"
+        className={`h-12 rounded-field border bg-paper-50 px-3.5 font-body text-base text-ink-900 ${
+          invalid ? 'border-brick-700' : 'border-paper-300'
         }`}
         {...props}
       />
 
       {invalid ? (
-        <Text className="text-sm text-red-600">{error}</Text>
+        <Text className="font-body text-sm text-brick-700">{error}</Text>
       ) : hint ? (
-        <Text className="text-sm text-neutral-500">{hint}</Text>
+        <Text className="font-body text-sm text-ink-400">{hint}</Text>
       ) : null}
     </View>
   );

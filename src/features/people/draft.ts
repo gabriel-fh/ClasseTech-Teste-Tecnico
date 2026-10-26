@@ -8,11 +8,6 @@ export interface PersonDraft {
   step: number;
   savedAt: string;
 }
-
-/**
- * O rascunho fica no MMKV, fora do React, para sobreviver ao app ser fechado no meio do
- * cadastro. Só vale para o cadastro novo: a edição de um cadastro existente não grava rascunho.
- */
 export function readDraft(): PersonDraft | null {
   const draft = readJson<PersonDraft>(StorageKey.personDraft);
 
@@ -26,7 +21,7 @@ export function readDraft(): PersonDraft | null {
     return null;
   }
 
-  // Preenche o que faltar, para um rascunho gravado por uma versão anterior não quebrar a tela.
+  // Completa o que faltar: um rascunho antigo pode não ter todos os campos de hoje.
   return {
     step: draft.step,
     savedAt: typeof draft.savedAt === 'string' ? draft.savedAt : '',
@@ -46,7 +41,6 @@ export function clearDraft(): void {
   removeKey(StorageKey.personDraft);
 }
 
-/** O rascunho só interessa quando tem algo digitado além do tipo e dos padrões. */
 export function draftHasContent(draft: PersonDraft): boolean {
   const empty = emptyPersonFormValues(draft.values.type);
   const ignoreType = (values: PersonFormValues) => JSON.stringify({ ...values, type: '' });

@@ -23,17 +23,6 @@ import {
   type PersonType,
 } from './types';
 
-/**
- * Os schemas validam exatamente o que o formulário guarda: string mascarada em todo campo.
- * A normalização (dígitos, data ISO, opcional vazio virando null) acontece em `toPersonInput`,
- * para que o resolver do react-hook-form nunca precise lidar com transform.
- *
- * O formulário é um objeto plano com os campos dos dois tipos, e não uma união discriminada:
- * o react-hook-form não tipa união bem. Quem separa os tipos é o schema escolhido pelo `type`
- * em `personFormSchemaFor`. Como `z.object` descarta chave desconhecida em vez de reclamar,
- * os campos do outro tipo são simplesmente ignorados.
- */
-
 const requiredText = (message: string) => z.string().trim().min(1, message);
 
 const fullName = (message: string) =>
@@ -103,6 +92,7 @@ export function personFormSchemaFor(type: PersonType) {
 export type ContactAddressForm = z.infer<typeof contactAddressSchema>;
 export type RepresentativeForm = z.infer<typeof representativeSchema>;
 
+// Objeto plano com os campos dos dois tipos. `z.object` descarta o que sobra do outro tipo.
 export interface PersonFormValues extends ContactAddressForm {
   type: PersonType;
 
@@ -123,7 +113,6 @@ export interface PersonFormValues extends ContactAddressForm {
   representative: RepresentativeForm;
 }
 
-/** Campos validados em cada etapa, para `trigger` antes de avançar o wizard. */
 export const INDIVIDUAL_DETAIL_FIELDS = [
   'name',
   'cpf',

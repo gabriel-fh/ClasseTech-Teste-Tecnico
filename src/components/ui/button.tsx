@@ -3,24 +3,24 @@ import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-n
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const CONTAINER: Record<ButtonVariant, string> = {
-  primary: 'bg-primary-600 active:bg-primary-700',
-  secondary: 'border border-neutral-300 bg-white active:bg-neutral-100',
-  ghost: 'active:bg-neutral-100',
-  danger: 'bg-red-600 active:bg-red-700',
+  primary: 'bg-accent-700 active:bg-accent-800',
+  secondary: 'border border-paper-300 bg-paper-50 active:bg-paper-100',
+  ghost: 'active:bg-paper-100',
+  danger: 'bg-brick-700 active:bg-brick-700/90',
 };
 
 const LABEL: Record<ButtonVariant, string> = {
-  primary: 'text-white',
-  secondary: 'text-neutral-900',
-  ghost: 'text-primary-700',
-  danger: 'text-white',
+  primary: 'text-paper-50',
+  secondary: 'text-ink-900',
+  ghost: 'text-accent-700',
+  danger: 'text-paper-50',
 };
 
 const SPINNER: Record<ButtonVariant, string> = {
-  primary: '#ffffff',
-  secondary: '#171717',
-  ghost: '#155fc2',
-  danger: '#ffffff',
+  primary: '#fcfbf8',
+  secondary: '#171310',
+  ghost: '#163a5c',
+  danger: '#fcfbf8',
 };
 
 interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
@@ -43,13 +43,15 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: blocked, busy: loading }}
       disabled={blocked}
-      className={`h-12 flex-row items-center justify-center gap-2 rounded-xl px-5 ${CONTAINER[variant]} ${
-        blocked ? 'opacity-50' : ''
+      className={`h-12 flex-row items-center justify-center gap-2 rounded-field px-5 ${CONTAINER[variant]} ${
+        blocked ? 'opacity-40' : ''
       }`}
       {...props}
     >
       {loading ? <ActivityIndicator size="small" color={SPINNER[variant]} /> : null}
-      <Text className={`text-base font-semibold ${LABEL[variant]}`}>{label}</Text>
+      <Text className={`font-body-semibold text-[15px] tracking-wide ${LABEL[variant]}`}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

@@ -50,13 +50,13 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
 
         {cep.loading ? (
           <View className="flex-row items-center gap-2">
-            <ActivityIndicator size="small" color="#737373" />
-            <Text className="text-sm text-neutral-500">Buscando endereço...</Text>
+            <ActivityIndicator size="small" color="#8c8373" />
+            <Text className="font-body text-sm leading-5 text-ink-400">Buscando endereço...</Text>
           </View>
         ) : null}
 
         {cep.notFound ? (
-          <Text className="text-sm text-amber-600">
+          <Text className="text-sm text-ochre-700">
             Não achamos este CEP. Preencha o endereço manualmente.
           </Text>
         ) : null}

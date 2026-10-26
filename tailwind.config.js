@@ -8,19 +8,51 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Cor primaria do app, derivada do azul do splash (#208AEF).
-        primary: {
-          50: '#eef7ff',
-          100: '#d9ecff',
-          200: '#bcdfff',
-          300: '#8ecdff',
-          400: '#59b1ff',
-          500: '#3394fb',
-          600: '#208aef',
-          700: '#155fc2',
-          800: '#18509d',
-          900: '#19467c',
+        paper: {
+          50: '#fcfbf8',
+          100: '#f5f2ea',
+          200: '#ebe6da',
+          300: '#ddd6c6',
         },
+        ink: {
+          300: '#b2a998',
+          400: '#8c8373',
+          500: '#6a6153',
+          700: '#3b342b',
+          900: '#171310',
+        },
+        accent: {
+          50: '#eef2f7',
+          100: '#d8e2ee',
+          200: '#b3c6dc',
+          600: '#1f4a74',
+          700: '#163a5c',
+          800: '#102840',
+          900: '#0b1c2d',
+        },
+        moss: {
+          100: '#e3ece0',
+          700: '#2f5d3a',
+        },
+        ochre: {
+          100: '#f6ecd6',
+          700: '#8a5a16',
+        },
+        brick: {
+          100: '#f3dfdb',
+          700: '#8f2d1f',
+        },
+      },
+      fontFamily: {
+        display: ['Fraunces_700Bold'],
+        'display-medium': ['Fraunces_600SemiBold'],
+        body: ['Archivo_400Regular'],
+        'body-medium': ['Archivo_500Medium'],
+        'body-semibold': ['Archivo_600SemiBold'],
+      },
+      borderRadius: {
+        field: '10px',
+        card: '14px',
       },
     },
   },
