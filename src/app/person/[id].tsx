@@ -1,14 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { listDocuments } from '@/features/documents/repository';
 import { calculateDocumentationStatus } from '@/features/documents/types';
-import { getPerson } from '@/features/people/repository';
+import { deletePerson, getPerson } from '@/features/people/repository';
 import {
   MARITAL_STATUS_LABELS,
   PERSON_TYPE_LABELS,
@@ -86,6 +89,9 @@ export default function PersonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
 
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const query = useQuery({
     queryKey: ['person', id],
     queryFn: async () => {
@@ -104,6 +110,29 @@ export default function PersonDetailScreen() {
       return { person, status };
     },
   });
+
+  const { refetch } = query;
+
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch]),
+  );
+
+  async function remove() {
+    setDeleting(true);
+
+    try {
+      await deletePerson(db, id);
+      setConfirming(false);
+      router.back();
+    } catch (error) {
+      setConfirming(false);
+      Alert.alert('Não foi possível excluir', String(error));
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   if (query.isPending) {
     return (
@@ -162,6 +191,29 @@ export default function PersonDetailScreen() {
           </View>
         ))}
       </ScrollView>
+
+      <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
+        <View className="flex-1">
+          <Button label="Excluir" variant="danger" onPress={() => setConfirming(true)} />
+        </View>
+        <View className="flex-[2]">
+          <Button
+            label="Editar"
+            onPress={() => router.push({ pathname: '/person/edit/[id]', params: { id } })}
+          />
+        </View>
+      </View>
+
+      <ConfirmDialog
+        visible={confirming}
+        title="Excluir este cadastro?"
+        message={`${personDisplayName(person)} e os documentos anexados saem do aparelho. Não dá para desfazer.`}
+        confirmLabel={deleting ? 'Excluindo...' : 'Excluir'}
+        cancelLabel="Cancelar"
+        destructive
+        onConfirm={() => void remove()}
+        onCancel={() => setConfirming(false)}
+      />
     </SafeAreaView>
   );
 }

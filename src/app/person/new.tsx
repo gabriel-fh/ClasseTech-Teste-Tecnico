@@ -168,7 +168,7 @@ export default function NewPersonScreen() {
 
       await createPerson(db, input);
       clearDraft();
-      router.replace('/');
+      router.back();
     } catch (error) {
       Alert.alert('Não foi possível salvar', String(error));
     } finally {

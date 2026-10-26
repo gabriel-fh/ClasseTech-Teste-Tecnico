@@ -72,6 +72,7 @@ export default function RootLayout() {
             <Stack.Screen name="index" options={{ title: 'Cadastros' }} />
             <Stack.Screen name="person/new" options={{ title: 'Novo cadastro' }} />
             <Stack.Screen name="person/[id]" options={{ title: 'Ficha' }} />
+            <Stack.Screen name="person/edit/[id]" options={{ title: 'Editar cadastro' }} />
           </Stack>
         </SQLiteProvider>
       </QueryClientProvider>

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { maskCep, maskCnpj, maskCpf, maskPhone } from '@/lib/masks';
 import {
   brazilianDateToIso,
   isAdult,
@@ -9,6 +10,7 @@ import {
   isValidCpf,
   isValidEmail,
   isValidPhone,
+  isoToBrazilianDate,
   isValidUf,
   normalizeCnpj,
   onlyDigits,
@@ -19,6 +21,7 @@ import {
   type CompanyInput,
   type IndividualInput,
   type MaritalStatus,
+  type Person,
   type PersonInput,
   type PersonType,
 } from './types';
@@ -238,4 +241,56 @@ export function toPersonInput(form: PersonFormValues): PersonInput {
   };
 
   return company;
+}
+
+export function toPersonFormValues(person: Person): PersonFormValues {
+  const base = emptyPersonFormValues(person.type);
+
+  const common = {
+    email: person.email,
+    phone: maskPhone(person.phone),
+    cep: maskCep(person.cep),
+    street: person.street,
+    number: person.number,
+    complement: person.complement ?? '',
+    district: person.district,
+    city: person.city,
+    uf: person.uf,
+  };
+
+  if (person.type === 'PF') {
+    return {
+      ...base,
+      ...common,
+      type: 'PF',
+      name: person.name,
+      cpf: maskCpf(person.cpf),
+      rg: person.rg,
+      rgIssuer: person.rgIssuer,
+      birthDate: isoToBrazilianDate(person.birthDate),
+      maritalStatus: person.maritalStatus,
+      occupation: person.occupation,
+      nationality: person.nationality,
+    };
+  }
+
+  return {
+    ...base,
+    ...common,
+    type: 'PJ',
+    legalName: person.legalName,
+    tradeName: person.tradeName ?? '',
+    cnpj: maskCnpj(person.cnpj),
+    stateRegistration: person.stateRegistration ?? '',
+    foundationDate: isoToBrazilianDate(person.foundationDate),
+    representative: person.representative
+      ? {
+          name: person.representative.name,
+          cpf: maskCpf(person.representative.cpf),
+          role: person.representative.role,
+          email: person.representative.email,
+          phone: maskPhone(person.representative.phone),
+        }
+      : base.representative,
+  };
 }
