@@ -142,11 +142,9 @@ export default function NewPersonScreen() {
             <IndividualDetailsStep control={form.control} />
           ) : null}
 
-          {step === 'details' && type === 'PJ' ? (
-            <CompanyDetailsStep control={form.control} />
-          ) : null}
+          {step === 'details' && type === 'PJ' ? <CompanyDetailsStep form={form} /> : null}
 
-          {step === 'address' ? <ContactAddressStep control={form.control} /> : null}
+          {step === 'address' ? <ContactAddressStep form={form} /> : null}
 
           {step === 'representative' ? <RepresentativeStep control={form.control} /> : null}
 

@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { FormSelectField } from '@/components/form/form-select-field';
 import { FormTextField } from '@/components/form/form-text-field';
@@ -6,11 +6,15 @@ import { maskCep, maskPhone } from '@/lib/masks';
 import { UFS, type Uf } from '@/lib/validators';
 
 import type { PersonFormValues } from '../schema';
+import { useCepAutofill } from '../use-autofill';
 import type { PersonFormApi } from '../use-person-form';
 
 const UF_OPTIONS = UFS.map((value) => ({ value, label: value }));
 
-export function ContactAddressStep({ control }: { control: PersonFormApi['control'] }) {
+export function ContactAddressStep({ form }: { form: PersonFormApi }) {
+  const control = form.control;
+  const cep = useCepAutofill(form);
+
   return (
     <View className="gap-4">
       <FormTextField<PersonFormValues>
@@ -33,15 +37,30 @@ export function ContactAddressStep({ control }: { control: PersonFormApi['contro
         mask={maskPhone}
       />
 
-      <FormTextField<PersonFormValues>
-        control={control}
-        name="cep"
-        label="CEP"
-        placeholder="00000-000"
-        keyboardType="number-pad"
-        maxLength={9}
-        mask={maskCep}
-      />
+      <View className="gap-1.5">
+        <FormTextField<PersonFormValues>
+          control={control}
+          name="cep"
+          label="CEP"
+          placeholder="00000-000"
+          keyboardType="number-pad"
+          maxLength={9}
+          mask={maskCep}
+        />
+
+        {cep.loading ? (
+          <View className="flex-row items-center gap-2">
+            <ActivityIndicator size="small" color="#737373" />
+            <Text className="text-sm text-neutral-500">Buscando endereço...</Text>
+          </View>
+        ) : null}
+
+        {cep.notFound ? (
+          <Text className="text-sm text-amber-600">
+            Não achamos este CEP. Preencha o endereço manualmente.
+          </Text>
+        ) : null}
+      </View>
 
       <FormTextField<PersonFormValues>
         control={control}

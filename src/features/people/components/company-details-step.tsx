@@ -1,12 +1,16 @@
-import { View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { FormTextField } from '@/components/form/form-text-field';
 import { maskCnpj, maskDate } from '@/lib/masks';
 
 import type { PersonFormValues } from '../schema';
+import { useCnpjAutofill } from '../use-autofill';
 import type { PersonFormApi } from '../use-person-form';
 
-export function CompanyDetailsStep({ control }: { control: PersonFormApi['control'] }) {
+export function CompanyDetailsStep({ form }: { form: PersonFormApi }) {
+  const control = form.control;
+  const cnpj = useCnpjAutofill(form);
+
   return (
     <View className="gap-4">
       <FormTextField<PersonFormValues>
@@ -26,15 +30,30 @@ export function CompanyDetailsStep({ control }: { control: PersonFormApi['contro
         hint="Opcional"
       />
 
-      <FormTextField<PersonFormValues>
-        control={control}
-        name="cnpj"
-        label="CNPJ"
-        placeholder="00.000.000/0000-00"
-        autoCapitalize="characters"
-        maxLength={18}
-        mask={maskCnpj}
-      />
+      <View className="gap-1.5">
+        <FormTextField<PersonFormValues>
+          control={control}
+          name="cnpj"
+          label="CNPJ"
+          placeholder="00.000.000/0000-00"
+          autoCapitalize="characters"
+          maxLength={18}
+          mask={maskCnpj}
+        />
+
+        {cnpj.loading ? (
+          <View className="flex-row items-center gap-2">
+            <ActivityIndicator size="small" color="#737373" />
+            <Text className="text-sm text-neutral-500">Buscando dados na Receita...</Text>
+          </View>
+        ) : null}
+
+        {cnpj.notFound ? (
+          <Text className="text-sm text-amber-600">
+            Não achamos este CNPJ. Preencha os dados manualmente.
+          </Text>
+        ) : null}
+      </View>
 
       <FormTextField<PersonFormValues>
         control={control}
