@@ -36,6 +36,7 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerTitleStyle: { fontSize: 17 } }}>
             <Stack.Screen name="index" options={{ title: 'Cadastros' }} />
             <Stack.Screen name="person/new" options={{ title: 'Novo cadastro' }} />
+            <Stack.Screen name="person/[id]" options={{ title: 'Cadastro' }} />
           </Stack>
         </SQLiteProvider>
       </QueryClientProvider>
