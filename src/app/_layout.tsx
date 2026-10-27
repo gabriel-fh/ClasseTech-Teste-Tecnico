@@ -12,8 +12,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Suspense, useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { ToastHost } from '@/components/ui/toast';
 import { DATABASE_NAME, migrateDatabase } from '@/lib/db';
 
 SplashScreen.preventAutoHideAsync();
@@ -74,8 +75,27 @@ export default function RootLayout() {
             <Stack.Screen name="person/edit/[id]" options={{ title: 'Editar cadastro' }} />
             <Stack.Screen name="person/documents/[id]" options={{ title: 'Documentos' }} />
           </Stack>
+          <ToastHost />
         </SQLiteProvider>
       </QueryClientProvider>
     </Suspense>
+  );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  return (
+    <View className="flex-1 items-center justify-center gap-4 bg-paper-50 p-8">
+      <Text className="text-center font-display text-xl text-ink-900">Algo deu errado</Text>
+      <Text className="text-center font-body text-sm leading-5 text-ink-400">
+        {error.message || 'O app encontrou um erro inesperado.'}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => void retry()}
+        className="h-12 items-center justify-center rounded-field bg-accent-700 px-5 active:bg-accent-800"
+      >
+        <Text className="font-body-semibold text-[15px] text-paper-50">Tentar de novo</Text>
+      </Pressable>
+    </View>
   );
 }

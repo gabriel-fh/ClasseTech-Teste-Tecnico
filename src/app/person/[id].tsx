@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { showToast } from '@/components/ui/toast';
 import { listDocuments } from '@/features/documents/repository';
 import { calculateDocumentationStatus } from '@/features/documents/types';
 import { removeFiles, removePersonFolder } from '@/features/documents/files';
@@ -129,6 +130,7 @@ export default function PersonDetailScreen() {
       removeFiles(files);
       removePersonFolder(id);
       setConfirming(false);
+      showToast('Cadastro excluído.');
       router.back();
     } catch (error) {
       setConfirming(false);

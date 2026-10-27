@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import Constants from 'expo-constants';
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
@@ -113,8 +114,11 @@ export default function HomeScreen() {
         />
       )}
 
-      <View className="absolute inset-x-0 bottom-0 border-t border-paper-200 bg-paper-50 p-4">
+      <View className="absolute inset-x-0 bottom-0 gap-2 border-t border-paper-200 bg-paper-50 p-4">
         <Button label="Novo cadastro" onPress={() => router.push('/person/new')} />
+        <Text className="text-center font-body text-[11px] text-ink-300">
+          v{Constants.expoConfig?.version ?? '1.0.0'}
+        </Text>
       </View>
     </SafeAreaView>
   );

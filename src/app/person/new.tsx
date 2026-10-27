@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { StepProgress } from '@/components/ui/step-progress';
+import { showToast } from '@/components/ui/toast';
 import { CompanyDetailsStep } from '@/features/people/components/company-details-step';
 import { ContactAddressStep } from '@/features/people/components/contact-address-step';
 import { IndividualDetailsStep } from '@/features/people/components/individual-details-step';
@@ -169,6 +170,7 @@ export default function NewPersonScreen() {
       const personId = await createPerson(db, input);
 
       clearDraft();
+      showToast('Cadastro salvo. Agora anexe os documentos.');
       router.replace({ pathname: '/person/documents/[id]', params: { id: personId } });
     } catch (error) {
       Alert.alert('Não foi possível salvar', String(error));

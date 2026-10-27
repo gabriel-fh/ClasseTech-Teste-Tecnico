@@ -14,7 +14,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { showToast } from '@/components/ui/toast';
 import { CompanyDetailsStep } from '@/features/people/components/company-details-step';
 import { ContactAddressStep } from '@/features/people/components/contact-address-step';
 import { IndividualDetailsStep } from '@/features/people/components/individual-details-step';
@@ -39,6 +41,7 @@ function EditForm({ id, person }: { id: string; person: Person }) {
   const db = useSQLiteContext();
   const form = usePersonForm(toPersonFormValues(person));
   const [saving, setSaving] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   async function save(values: PersonFormValues) {
     if (saving) {
@@ -60,6 +63,7 @@ function EditForm({ id, person }: { id: string; person: Person }) {
       }
 
       await updatePerson(db, id, input);
+      showToast('Alterações salvas.');
       router.back();
     } catch (error) {
       Alert.alert('Não foi possível salvar', String(error));
@@ -102,7 +106,7 @@ function EditForm({ id, person }: { id: string; person: Person }) {
           <Button
             label="Cancelar"
             variant="secondary"
-            onPress={() => router.back()}
+            onPress={() => (form.formState.isDirty ? setLeaving(true) : router.back())}
             disabled={saving}
           />
         </View>
@@ -114,6 +118,20 @@ function EditForm({ id, person }: { id: string; person: Person }) {
           />
         </View>
       </View>
+
+      <ConfirmDialog
+        visible={leaving}
+        title="Descartar as alterações?"
+        message="O que você mudou nesta ficha não foi salvo."
+        confirmLabel="Descartar"
+        cancelLabel="Continuar editando"
+        destructive
+        onConfirm={() => {
+          setLeaving(false);
+          router.back();
+        }}
+        onCancel={() => setLeaving(false)}
+      />
     </KeyboardAvoidingView>
   );
 }

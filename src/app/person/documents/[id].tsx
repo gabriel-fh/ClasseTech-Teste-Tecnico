@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { showToast } from '@/components/ui/toast';
 import {
   formatBytes,
   MAX_FILE_BYTES,
@@ -84,6 +85,7 @@ export default function DocumentsScreen() {
       });
 
       await refetch();
+      showToast('Documento anexado.');
     } catch (error) {
       Alert.alert('Não foi possível anexar', String(error));
     } finally {
@@ -188,6 +190,7 @@ export default function DocumentsScreen() {
 
       setRemoving(null);
       await refetch();
+      showToast('Documento removido.');
     } catch (error) {
       Alert.alert('Não foi possível remover', String(error));
     } finally {
