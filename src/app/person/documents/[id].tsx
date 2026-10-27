@@ -18,6 +18,7 @@ import {
   formatBytes,
   MAX_FILE_BYTES,
   measure,
+  nameFromLabel,
   removeFile,
   saveAttachment,
 } from '@/features/documents/files';
@@ -25,6 +26,7 @@ import { createDocument, deleteDocument, listDocuments } from '@/features/docume
 import {
   buildChecklist,
   calculateDocumentationStatus,
+  documentLabel,
   type DocumentType,
   type PersonDocument,
 } from '@/features/documents/types';
@@ -93,6 +95,13 @@ export default function DocumentsScreen() {
     }
   }
 
+  function photoName(type: DocumentType, uri: string, mimeType: string): string {
+    const label = documentLabel(type);
+    const taken = query.data?.documents.filter((document) => document.type === type).length ?? 0;
+
+    return nameFromLabel(taken > 0 ? `${label} ${taken + 1}` : label, uri, mimeType);
+  }
+
   async function fromCamera(type: DocumentType) {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -109,11 +118,12 @@ export default function DocumentsScreen() {
     }
 
     const asset = result.assets[0];
+    const mimeType = asset.mimeType ?? 'image/jpeg';
 
     await attach(type, {
       uri: asset.uri,
-      name: asset.fileName ?? 'foto.jpg',
-      mimeType: asset.mimeType ?? 'image/jpeg',
+      name: photoName(type, asset.uri, mimeType),
+      mimeType,
       size: asset.fileSize ?? measure(asset.uri),
     });
   }
@@ -129,11 +139,12 @@ export default function DocumentsScreen() {
     }
 
     const asset = result.assets[0];
+    const mimeType = asset.mimeType ?? 'image/jpeg';
 
     await attach(type, {
       uri: asset.uri,
-      name: asset.fileName ?? 'imagem.jpg',
-      mimeType: asset.mimeType ?? 'image/jpeg',
+      name: photoName(type, asset.uri, mimeType),
+      mimeType,
       size: asset.fileSize ?? measure(asset.uri),
     });
   }

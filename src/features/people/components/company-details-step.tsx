@@ -61,8 +61,10 @@ export function CompanyDetailsStep({ form }: { form: PersonFormApi }) {
         control={control}
         name="stateRegistration"
         label="Inscrição estadual"
-        placeholder="000.000.000.000"
-        hint="Opcional"
+        placeholder="000000000000"
+        autoCapitalize="characters"
+        maxLength={20}
+        hint="Opcional. O formato muda conforme o estado; escreva ISENTO quando não houver."
       />
 
       <FormTextField<PersonFormValues>

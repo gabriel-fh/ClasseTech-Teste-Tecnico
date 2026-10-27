@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, usePreventRemove } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
@@ -69,6 +69,9 @@ export default function NewPersonScreen() {
   const [index, setIndex] = useState(0);
   const [typeChosen, setTypeChosen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [hasContent, setHasContent] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [exitRequest, setExitRequest] = useState<(() => void) | null>(null);
 
   // `ready` segura a gravação até o usuário responder, para não sobrescrever o rascunho salvo.
   const [savedDraft] = useState<PersonDraft | null>(() => {
@@ -91,11 +94,19 @@ export default function NewPersonScreen() {
     }
 
     const subscription = form.watch((values) => {
-      writeDraft(values as PersonFormValues, index);
+      const draft: PersonDraft = { values: values as PersonFormValues, step: index, savedAt: '' };
+
+      writeDraft(draft.values, index);
+      setHasContent(draftHasContent(draft));
     });
 
     return () => subscription.unsubscribe();
   }, [form, index, ready]);
+
+  // A seta do header e o botão físico do Android saem da tela sem passar pelo `goBack` daqui.
+  const allowExit = usePreventRemove(hasContent && !leaving, ({ repeat }) => {
+    setExitRequest(() => repeat);
+  });
 
   const type = form.watch('type');
   const steps = STEPS[type];
@@ -109,6 +120,7 @@ export default function NewPersonScreen() {
       form.reset(pendingDraft.values);
       setIndex(Math.min(Math.max(pendingDraft.step, 0), draftSteps.length - 1));
       setTypeChosen(true);
+      setHasContent(true);
     }
 
     setPendingDraft(null);
@@ -119,6 +131,14 @@ export default function NewPersonScreen() {
     clearDraft();
     setPendingDraft(null);
     setReady(true);
+  }
+
+  function confirmExit() {
+    const repeat = exitRequest;
+
+    setLeaving(true);
+    setExitRequest(null);
+    repeat?.();
   }
 
   function chooseType(next: PersonType) {
@@ -170,6 +190,8 @@ export default function NewPersonScreen() {
       const personId = await createPerson(db, input);
 
       clearDraft();
+      setLeaving(true);
+      allowExit();
       showToast('Cadastro salvo. Agora anexe os documentos.');
       router.replace({ pathname: '/person/documents/[id]', params: { id: personId } });
     } catch (error) {
@@ -244,6 +266,16 @@ export default function NewPersonScreen() {
         cancelLabel="Descartar"
         onConfirm={resumeDraft}
         onCancel={discardDraft}
+      />
+
+      <ConfirmDialog
+        visible={exitRequest !== null}
+        title="Sair do cadastro?"
+        message="O que você preencheu fica guardado como rascunho e volta quando você abrir um novo cadastro."
+        confirmLabel="Sair"
+        cancelLabel="Continuar preenchendo"
+        onConfirm={confirmExit}
+        onCancel={() => setExitRequest(null)}
       />
     </SafeAreaView>
   );

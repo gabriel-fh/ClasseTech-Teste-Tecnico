@@ -60,6 +60,14 @@ export const REQUIRED_DOCUMENTS: Record<PersonType, RequiredDocument[]> = {
   ],
 };
 
+export function documentLabel(type: DocumentType): string {
+  const required = Object.values(REQUIRED_DOCUMENTS)
+    .flat()
+    .find((item) => item.type === type);
+
+  return required?.label ?? 'Documento';
+}
+
 export interface PersonDocument {
   id: string;
   personId: string;
