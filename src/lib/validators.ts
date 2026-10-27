@@ -184,3 +184,21 @@ export function isAdult(value: string, reference: Date = new Date()): boolean {
 
   return age !== null && age >= 18;
 }
+
+export function isPlausibleAge(value: string, reference: Date = new Date()): boolean {
+  const age = calculateAge(value, reference);
+
+  return age !== null && age <= 120;
+}
+
+export function isNotFutureDate(value: string, reference: Date = new Date()): boolean {
+  const date = parseBrazilianDate(value);
+
+  if (!date) {
+    return false;
+  }
+
+  const today = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
+
+  return date.getTime() <= today.getTime();
+}

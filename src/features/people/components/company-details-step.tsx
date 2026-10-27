@@ -3,7 +3,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import { FormTextField } from '@/components/form/form-text-field';
 import { maskCnpj, maskDate } from '@/lib/masks';
 
-import type { PersonFormValues } from '../schema';
+import { FIELD_LIMITS, type PersonFormValues } from '../schema';
 import { useCnpjAutofill } from '../use-autofill';
 import type { PersonFormApi } from '../use-person-form';
 
@@ -19,6 +19,7 @@ export function CompanyDetailsStep({ form }: { form: PersonFormApi }) {
         label="Razão social"
         placeholder="Imobiliária Exemplo Ltda"
         autoCapitalize="words"
+        maxLength={FIELD_LIMITS.legalName}
       />
 
       <FormTextField<PersonFormValues>
@@ -27,6 +28,7 @@ export function CompanyDetailsStep({ form }: { form: PersonFormApi }) {
         label="Nome fantasia"
         placeholder="Exemplo Imóveis"
         autoCapitalize="words"
+        maxLength={FIELD_LIMITS.line}
         hint="Opcional"
       />
 
@@ -63,7 +65,7 @@ export function CompanyDetailsStep({ form }: { form: PersonFormApi }) {
         label="Inscrição estadual"
         placeholder="000000000000"
         autoCapitalize="characters"
-        maxLength={20}
+        maxLength={FIELD_LIMITS.document}
         hint="Opcional. O formato muda conforme o estado; escreva ISENTO quando não houver."
       />
 

@@ -1,6 +1,7 @@
 import {
   companyFormSchema,
   emptyPersonFormValues,
+  FIELD_LIMITS,
   individualFormSchema,
   toPersonInput,
   type PersonFormValues,
@@ -99,6 +100,36 @@ describe('individualFormSchema', () => {
     expect(result.success).toBe(false);
     expect(result.error?.issues.length).toBeGreaterThan(5);
   });
+
+  it('trata campo so com espacos como vazio', () => {
+    const result = individualFormSchema.safeParse(validIndividual({ city: '   ' }));
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('Informe a cidade');
+  });
+
+  it('rejeita texto acima do limite do campo', () => {
+    const result = individualFormSchema.safeParse(
+      validIndividual({ occupation: 'a'.repeat(FIELD_LIMITS.text + 1) }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe(`Use no máximo ${FIELD_LIMITS.text} caracteres`);
+  });
+
+  it('rejeita RG curto demais', () => {
+    const result = individualFormSchema.safeParse(validIndividual({ rg: '123' }));
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('RG incompleto');
+  });
+
+  it('rejeita ano de nascimento implausivel', () => {
+    const result = individualFormSchema.safeParse(validIndividual({ birthDate: '01/01/1850' }));
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('Confira o ano de nascimento');
+  });
 });
 
 describe('companyFormSchema', () => {
@@ -111,6 +142,27 @@ describe('companyFormSchema', () => {
 
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe('CNPJ inválido');
+  });
+
+  it('rejeita data de abertura no futuro', () => {
+    const nextYear = new Date().getFullYear() + 1;
+    const result = companyFormSchema.safeParse(
+      validCompany({ foundationDate: `01/02/${nextYear}` }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('A data de abertura não pode ser futura');
+  });
+
+  it('rejeita razao social acima do limite', () => {
+    const result = companyFormSchema.safeParse(
+      validCompany({ legalName: 'a'.repeat(FIELD_LIMITS.legalName + 1) }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe(
+      `Use no máximo ${FIELD_LIMITS.legalName} caracteres`,
+    );
   });
 
   it('exige o representante legal', () => {

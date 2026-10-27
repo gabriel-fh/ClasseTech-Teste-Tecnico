@@ -5,7 +5,7 @@ import { FormTextField } from '@/components/form/form-text-field';
 import { maskCep, maskPhone } from '@/lib/masks';
 import { UFS, type Uf } from '@/lib/validators';
 
-import type { PersonFormValues } from '../schema';
+import { FIELD_LIMITS, type PersonFormValues } from '../schema';
 import { useCepAutofill } from '../use-autofill';
 import type { PersonFormApi } from '../use-person-form';
 
@@ -25,6 +25,7 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete="email"
+        maxLength={FIELD_LIMITS.email}
       />
 
       <FormTextField<PersonFormValues>
@@ -68,6 +69,7 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
         label="Logradouro"
         placeholder="Rua São João"
         autoCapitalize="words"
+        maxLength={FIELD_LIMITS.line}
       />
 
       <View className="flex-row gap-3">
@@ -77,7 +79,9 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
             name="number"
             label="Número"
             placeholder="120"
-            keyboardType="number-pad"
+            autoCapitalize="characters"
+            maxLength={FIELD_LIMITS.number}
+            hint="S/N se não houver"
           />
         </View>
         <View className="flex-[2]">
@@ -86,6 +90,7 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
             name="complement"
             label="Complemento"
             placeholder="Apto 302"
+            maxLength={FIELD_LIMITS.text}
             hint="Opcional"
           />
         </View>
@@ -97,6 +102,7 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
         label="Bairro"
         placeholder="Icaraí"
         autoCapitalize="words"
+        maxLength={FIELD_LIMITS.text}
       />
 
       <View className="flex-row gap-3">
@@ -107,6 +113,7 @@ export function ContactAddressStep({ form }: { form: PersonFormApi }) {
             label="Cidade"
             placeholder="Niterói"
             autoCapitalize="words"
+            maxLength={FIELD_LIMITS.text}
           />
         </View>
         <View className="flex-1">

@@ -4,7 +4,7 @@ import { FormSelectField } from '@/components/form/form-select-field';
 import { FormTextField } from '@/components/form/form-text-field';
 import { maskCpf, maskDate } from '@/lib/masks';
 
-import type { PersonFormValues } from '../schema';
+import { FIELD_LIMITS, type PersonFormValues } from '../schema';
 import { MARITAL_STATUSES, MARITAL_STATUS_LABELS } from '../types';
 import type { PersonFormApi } from '../use-person-form';
 
@@ -23,6 +23,7 @@ export function IndividualDetailsStep({ control }: { control: PersonFormApi['con
         placeholder="Maria Souza"
         autoCapitalize="words"
         autoComplete="name"
+        maxLength={FIELD_LIMITS.name}
       />
 
       <FormTextField<PersonFormValues>
@@ -42,6 +43,7 @@ export function IndividualDetailsStep({ control }: { control: PersonFormApi['con
             name="rg"
             label="RG"
             placeholder="12.345.678-9"
+            maxLength={FIELD_LIMITS.document}
           />
         </View>
         <View className="flex-1">
@@ -51,6 +53,7 @@ export function IndividualDetailsStep({ control }: { control: PersonFormApi['con
             label="Órgão emissor"
             placeholder="SSP/RJ"
             autoCapitalize="characters"
+            maxLength={FIELD_LIMITS.document}
           />
         </View>
       </View>
@@ -78,6 +81,7 @@ export function IndividualDetailsStep({ control }: { control: PersonFormApi['con
         name="occupation"
         label="Profissão"
         placeholder="Arquiteta"
+        maxLength={FIELD_LIMITS.text}
       />
 
       <FormTextField<PersonFormValues>
@@ -85,6 +89,7 @@ export function IndividualDetailsStep({ control }: { control: PersonFormApi['con
         name="nationality"
         label="Nacionalidade"
         placeholder="Brasileira"
+        maxLength={FIELD_LIMITS.text}
       />
     </View>
   );

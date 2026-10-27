@@ -1,6 +1,7 @@
 import { router, usePreventRemove } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
+import { get, type FieldErrors } from 'react-hook-form';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -141,6 +142,20 @@ export default function NewPersonScreen() {
     repeat?.();
   }
 
+  // Na revisão os erros caem em campos de etapas anteriores, que a tela não mostra: sem isto o
+  // botão "Salvar cadastro" não daria sinal nenhum.
+  function reportInvalid(errors: FieldErrors<PersonFormValues>) {
+    const target = steps.findIndex((id) =>
+      fieldsOf(id, type).some((field) => get(errors, field) !== undefined),
+    );
+
+    if (target >= 0) {
+      setIndex(target);
+    }
+
+    showToast('Revise os campos marcados em vermelho.');
+  }
+
   function chooseType(next: PersonType) {
     form.setValue('type', next);
     setTypeChosen(true);
@@ -240,7 +255,7 @@ export default function NewPersonScreen() {
               <Button
                 label="Salvar cadastro"
                 loading={saving}
-                onPress={() => void form.handleSubmit(save)()}
+                onPress={() => void form.handleSubmit(save, reportInvalid)()}
                 accessibilityHint="Grava o cadastro no aparelho"
               />
             ) : (

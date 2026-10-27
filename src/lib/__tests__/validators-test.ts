@@ -2,6 +2,8 @@ import {
   brazilianDateToIso,
   calculateAge,
   isAdult,
+  isNotFutureDate,
+  isPlausibleAge,
   isValidBrazilianDate,
   isValidCep,
   isValidCnpj,
@@ -130,5 +132,41 @@ describe('datas', () => {
 
     expect(isAdult('24/10/2008', reference)).toBe(true);
     expect(isAdult('25/10/2008', reference)).toBe(false);
+  });
+});
+
+describe('isPlausibleAge', () => {
+  const reference = new Date(2026, 9, 27);
+
+  it('aceita uma data de nascimento normal', () => {
+    expect(isPlausibleAge('10/03/1990', reference)).toBe(true);
+  });
+
+  it('rejeita ano fora do alcance de uma vida', () => {
+    expect(isPlausibleAge('01/01/1850', reference)).toBe(false);
+  });
+
+  it('rejeita data que nao existe', () => {
+    expect(isPlausibleAge('31/02/1990', reference)).toBe(false);
+  });
+});
+
+describe('isNotFutureDate', () => {
+  const reference = new Date(2026, 9, 27);
+
+  it('aceita o dia de hoje', () => {
+    expect(isNotFutureDate('27/10/2026', reference)).toBe(true);
+  });
+
+  it('aceita data passada', () => {
+    expect(isNotFutureDate('01/02/2015', reference)).toBe(true);
+  });
+
+  it('rejeita o dia seguinte', () => {
+    expect(isNotFutureDate('28/10/2026', reference)).toBe(false);
+  });
+
+  it('rejeita entrada invalida', () => {
+    expect(isNotFutureDate('', reference)).toBe(false);
   });
 });

@@ -43,6 +43,10 @@ function EditForm({ id, person }: { id: string; person: Person }) {
   const [saving, setSaving] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
+  function reportInvalid() {
+    showToast('Revise os campos marcados em vermelho.');
+  }
+
   async function save(values: PersonFormValues) {
     if (saving) {
       return;
@@ -55,9 +59,10 @@ function EditForm({ id, person }: { id: string; person: Person }) {
       const document = input.type === 'PF' ? input.cpf : input.cnpj;
 
       if (await isDocumentTaken(db, document, input.type, id)) {
-        form.setError(input.type === 'PF' ? 'cpf' : 'cnpj', {
-          message: `Já existe um cadastro com este ${input.type === 'PF' ? 'CPF' : 'CNPJ'}`,
-        });
+        const field = input.type === 'PF' ? 'cpf' : 'cnpj';
+
+        form.setError(field, { message: `Já existe um cadastro com este ${field.toUpperCase()}` });
+        form.setFocus(field);
 
         return;
       }
@@ -114,7 +119,7 @@ function EditForm({ id, person }: { id: string; person: Person }) {
           <Button
             label="Salvar alterações"
             loading={saving}
-            onPress={() => void form.handleSubmit(save)()}
+            onPress={() => void form.handleSubmit(save, reportInvalid)()}
           />
         </View>
       </View>

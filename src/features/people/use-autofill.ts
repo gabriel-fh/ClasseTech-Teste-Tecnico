@@ -36,7 +36,9 @@ export function useCepAutofill(form: PersonFormApi): AutofillState {
   });
 
   const address = query.data ?? null;
-  const applied = useRef<string | null>(null);
+  // No cadastro novo o campo chega vazio; na edição ele já vem preenchido. Marcar o valor inicial
+  // como aplicado evita que a consulta sobrescreva o endereço corrigido à mão.
+  const applied = useRef<string | null>(enabled ? digits : null);
 
   useEffect(() => {
     if (!address || applied.current === digits) {
@@ -74,7 +76,9 @@ export function useCnpjAutofill(form: PersonFormApi): AutofillState {
   });
 
   const company = query.data ?? null;
-  const applied = useRef<string | null>(null);
+  // Mesma regra do CEP: abrir a edição de uma empresa já salva não pode trocar o que está na ficha
+  // pelo que a Receita devolve agora.
+  const applied = useRef<string | null>(enabled ? normalized : null);
 
   useEffect(() => {
     if (!company || applied.current === normalized) {

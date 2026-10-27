@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { FormTextField } from '@/components/form/form-text-field';
 import { maskCpf, maskPhone } from '@/lib/masks';
 
-import type { PersonFormValues } from '../schema';
+import { FIELD_LIMITS, type PersonFormValues } from '../schema';
 import type { PersonFormApi } from '../use-person-form';
 
 export function RepresentativeStep({ control }: { control: PersonFormApi['control'] }) {
@@ -19,6 +19,7 @@ export function RepresentativeStep({ control }: { control: PersonFormApi['contro
         label="Nome completo"
         placeholder="João Lima"
         autoCapitalize="words"
+        maxLength={FIELD_LIMITS.name}
       />
 
       <FormTextField<PersonFormValues>
@@ -36,6 +37,7 @@ export function RepresentativeStep({ control }: { control: PersonFormApi['contro
         name="representative.role"
         label="Cargo"
         placeholder="Sócio administrador"
+        maxLength={FIELD_LIMITS.text}
       />
 
       <FormTextField<PersonFormValues>
@@ -45,6 +47,7 @@ export function RepresentativeStep({ control }: { control: PersonFormApi['contro
         placeholder="joao@exemplo.com"
         keyboardType="email-address"
         autoCapitalize="none"
+        maxLength={FIELD_LIMITS.email}
       />
 
       <FormTextField<PersonFormValues>
