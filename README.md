@@ -33,7 +33,11 @@ As pastas `android/` e `ios/` são geradas (Continuous Native Generation). Elas 
 
 **Rascunho.** O que foi digitado é salvo a cada tecla no MMKV. Fechar o app ou sair da tela no meio do cadastro não perde nada: ao abrir um cadastro novo o app oferece retomar. Sair da tela com conteúdo preenchido pede confirmação, pela seta do header e pelo botão físico do Android.
 
-**Preenchimento automático.** No cadastro de empresa o CNPJ é o primeiro campo, porque é ele que preenche o resto: a consulta na BrasilAPI traz razão social, nome fantasia, data de abertura, telefone e endereço, e o que a Receita devolve em branco fica para o usuário digitar. Inscrição estadual não existe nessa API, então é sempre manual. O CEP, digitado ou trazido pelo CNPJ, busca o endereço no ViaCEP. As duas consultas têm timeout de 8 segundos; sem internet ou com documento não encontrado o app avisa na própria tela e deixa preencher à mão. Na edição a consulta só roda se o usuário trocar o documento, para não desfazer correção feita à mão.
+**Preenchimento automático.** No cadastro de empresa o CNPJ é o primeiro campo: a consulta na BrasilAPI traz razão social, nome fantasia e data de abertura, e o que a Receita devolve em branco fica para o usuário digitar. Inscrição estadual não existe nessa API, então é sempre manual.
+
+A consulta do CNPJ **não** preenche contato e endereço, embora a Receita devolva os dois. A etapa de contato e endereço de um cadastro novo tem que começar vazia, sempre: endereço de empresa costuma ser o do dono, e ver a etapa inteira preenchida sozinha parece que o app trouxe sobra do cadastro anterior. O endereço entra pelo CEP, do mesmo jeito nos dois tipos.
+
+O CEP busca no ViaCEP ao completar 8 dígitos. As duas consultas têm timeout de 8 segundos; sem internet ou com documento não encontrado o app avisa na própria tela e deixa preencher à mão. Na edição a consulta só roda se o usuário trocar o documento, para não desfazer correção feita à mão.
 
 **Documentos.** Checklist do que cada tipo exige, com badge de enviado ou faltando por item e status geral no topo. Anexar abre câmera, galeria ou PDF. Limite de 10 MB por arquivo. Abrir usa o preview nativo do sistema. Remover apaga o arquivo do disco junto com o registro. Salvar um cadastro leva direto para esta tela, que avisa que o cadastro foi salvo e tem um botão Concluir para voltar à lista: anexar os documentos na hora é opcional.
 

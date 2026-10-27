@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { useWatch } from 'react-hook-form';
 
 import { fetchAddressByCep, fetchCompanyByCnpj } from '@/lib/api';
-import { maskCep, maskPhone } from '@/lib/masks';
 import { isValidCnpj, normalizeCnpj, onlyDigits } from '@/lib/validators';
 
 import type { PersonFormValues } from './schema';
@@ -90,17 +89,11 @@ export function useCnpjAutofill(form: PersonFormApi, editing = false): AutofillS
 
     const fill = filler(form);
 
+    // Só os dados da empresa. Contato e endereço ficam de fora de propósito: um cadastro novo tem
+    // que chegar nessa etapa com tudo vazio, e o endereço entra pelo CEP, como na pessoa física.
     fill('legalName', company.legalName);
     fill('tradeName', company.tradeName);
     fill('foundationDate', company.foundationDate);
-    fill('phone', maskPhone(company.phone));
-    fill('cep', maskCep(company.cep));
-    fill('street', company.street);
-    fill('number', company.number);
-    fill('complement', company.complement);
-    fill('district', company.district);
-    fill('city', company.city);
-    fill('uf', company.uf);
   }, [company, normalized, form]);
 
   return {
