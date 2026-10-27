@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { FormSelectField } from '@/components/form/form-select-field';
 import { FormTextField } from '@/components/form/form-text-field';
 import { maskCep, maskPhone } from '@/lib/masks';
-import { UFS, type Uf } from '@/lib/validators';
+import { onlyDigits, UFS, type Uf } from '@/lib/validators';
 
 import { FIELD_LIMITS, type PersonFormValues } from '../schema';
 import { useCepAutofill } from '../use-autofill';
@@ -20,6 +21,10 @@ export function ContactAddressStep({
 }) {
   const control = form.control;
   const cep = useCepAutofill(form, editing);
+
+  // Num cadastro novo o endereço só chega pronto se veio da consulta do CNPJ ou de um rascunho
+  // retomado. Dizer isso evita que ele pareça sobra de outro cadastro.
+  const [prefilled] = useState(() => onlyDigits(form.getValues('cep')).length === 8);
 
   return (
     <View className="gap-4">
@@ -65,6 +70,12 @@ export function ContactAddressStep({
         {cep.notFound ? (
           <Text className="text-sm text-ochre-700">
             Não achamos este CEP. Preencha o endereço manualmente.
+          </Text>
+        ) : null}
+
+        {prefilled && !editing && !cep.loading ? (
+          <Text className="font-body text-sm leading-5 text-ink-400">
+            Endereço preenchido pela consulta automática. Confira e corrija se precisar.
           </Text>
         ) : null}
       </View>
