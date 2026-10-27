@@ -3,8 +3,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Alert, Text, View } from 'react-native';
-import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -19,9 +19,8 @@ import { toPersonFormValues, toPersonInput, type PersonFormValues } from '@/feat
 import type { Person } from '@/features/people/types';
 import { usePersonForm } from '@/features/people/use-person-form';
 
-// Altura da barra de botões. O scroll do campo com foco precisa parar acima dela, e a barra
-// sobe junto com o teclado levando a área segura do gesto.
-const FOOTER_HEIGHT = 80;
+// Folga entre o campo com foco e o topo do teclado.
+const FOCUS_GAP = 24;
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -36,7 +35,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function EditForm({ id, person }: { id: string; person: Person }) {
   const db = useSQLiteContext();
-  const insets = useSafeAreaInsets();
   const form = usePersonForm(toPersonFormValues(person));
   const [saving, setSaving] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -77,11 +75,12 @@ function EditForm({ id, person }: { id: string; person: Person }) {
 
   return (
     <>
+      {/* Rola até o campo com foco e reserva embaixo a altura do teclado, para o que fica atrás
+          dele continuar alcançável na rolagem. */}
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        bottomOffset={FOOTER_HEIGHT + insets.bottom}
+        bottomOffset={FOCUS_GAP}
       >
         <View className="gap-7 p-4 pb-8">
           <Section title={person.type === 'PF' ? 'Dados pessoais' : 'Dados da empresa'}>
@@ -104,25 +103,23 @@ function EditForm({ id, person }: { id: string; person: Person }) {
         </View>
       </KeyboardAwareScrollView>
 
-      <KeyboardStickyView>
-        <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
-          <View className="flex-1">
-            <Button
-              label="Cancelar"
-              variant="secondary"
-              onPress={() => (form.formState.isDirty ? setLeaving(true) : router.back())}
-              disabled={saving}
-            />
-          </View>
-          <View className="flex-[2]">
-            <Button
-              label="Salvar alterações"
-              loading={saving}
-              onPress={() => void form.handleSubmit(save, reportInvalid)()}
-            />
-          </View>
+      <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
+        <View className="flex-1">
+          <Button
+            label="Cancelar"
+            variant="secondary"
+            onPress={() => (form.formState.isDirty ? setLeaving(true) : router.back())}
+            disabled={saving}
+          />
         </View>
-      </KeyboardStickyView>
+        <View className="flex-[2]">
+          <Button
+            label="Salvar alterações"
+            loading={saving}
+            onPress={() => void form.handleSubmit(save, reportInvalid)()}
+          />
+        </View>
+      </View>
 
       <ConfirmDialog
         visible={leaving}

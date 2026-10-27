@@ -3,8 +3,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { get, type FieldErrors } from 'react-hook-form';
 import { Alert, View } from 'react-native';
-import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -39,9 +39,8 @@ import { usePersonForm } from '@/features/people/use-person-form';
 
 type StepId = 'type' | 'details' | 'address' | 'representative' | 'review';
 
-// Altura da barra de botões. O scroll do campo com foco precisa parar acima dela, e a barra
-// sobe junto com o teclado levando a área segura do gesto.
-const FOOTER_HEIGHT = 80;
+// Folga entre o campo com foco e o topo do teclado.
+const FOCUS_GAP = 24;
 
 const STEPS: Record<PersonType, StepId[]> = {
   PF: ['type', 'details', 'address', 'review'],
@@ -71,7 +70,6 @@ function fieldsOf(step: StepId, type: PersonType): readonly string[] {
 
 export default function NewPersonScreen() {
   const db = useSQLiteContext();
-  const insets = useSafeAreaInsets();
   const form = usePersonForm();
 
   const [index, setIndex] = useState(0);
@@ -245,13 +243,13 @@ export default function NewPersonScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
-      {/* A rolagem até o campo com foco e a barra acima do teclado vêm do keyboard-controller: o
-          `KeyboardAvoidingView` do React Native não faz nada no Android em edge-to-edge. */}
+      {/* O `KeyboardAvoidingView` do React Native não faz nada no Android em edge-to-edge, que é o
+          padrão do SDK 58. Este ScrollView rola até o campo com foco e reserva embaixo a altura do
+          teclado, então dá para rolar o que fica atrás dele. A barra de botões não se mexe. */}
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        bottomOffset={FOOTER_HEIGHT + insets.bottom}
+        bottomOffset={FOCUS_GAP}
       >
         <View className="gap-6 p-4 pb-8">
           <StepProgress current={index + 1} total={steps.length} label={TITLES[step]} />
@@ -274,29 +272,23 @@ export default function NewPersonScreen() {
         </View>
       </KeyboardAwareScrollView>
 
-      <KeyboardStickyView>
-        <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
-          <View className="flex-1">
-            <Button label="Voltar" variant="secondary" onPress={goBack} disabled={saving} />
-          </View>
-          <View className="flex-[2]">
-            {isReview ? (
-              <Button
-                label="Salvar cadastro"
-                loading={saving}
-                onPress={() => void form.handleSubmit(save, reportInvalid)()}
-                accessibilityHint="Grava o cadastro no aparelho"
-              />
-            ) : (
-              <Button
-                label="Continuar"
-                disabled={step === 'type' && !typeChosen}
-                onPress={goNext}
-              />
-            )}
-          </View>
+      <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
+        <View className="flex-1">
+          <Button label="Voltar" variant="secondary" onPress={goBack} disabled={saving} />
         </View>
-      </KeyboardStickyView>
+        <View className="flex-[2]">
+          {isReview ? (
+            <Button
+              label="Salvar cadastro"
+              loading={saving}
+              onPress={() => void form.handleSubmit(save, reportInvalid)()}
+              accessibilityHint="Grava o cadastro no aparelho"
+            />
+          ) : (
+            <Button label="Continuar" disabled={step === 'type' && !typeChosen} onPress={goNext} />
+          )}
+        </View>
+      </View>
 
       <ConfirmDialog
         visible={pendingDraft !== null}
