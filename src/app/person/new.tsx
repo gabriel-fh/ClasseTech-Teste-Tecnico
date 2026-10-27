@@ -2,8 +2,9 @@ import { router, usePreventRemove } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { get, type FieldErrors } from 'react-hook-form';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, View } from 'react-native';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -27,6 +28,7 @@ import { createPerson, isDocumentTaken } from '@/features/people/repository';
 import {
   COMPANY_DETAIL_FIELDS,
   CONTACT_ADDRESS_FIELDS,
+  emptyPersonFormValues,
   INDIVIDUAL_DETAIL_FIELDS,
   REPRESENTATIVE_FIELDS,
   toPersonInput,
@@ -36,6 +38,10 @@ import type { PersonType } from '@/features/people/types';
 import { usePersonForm } from '@/features/people/use-person-form';
 
 type StepId = 'type' | 'details' | 'address' | 'representative' | 'review';
+
+// Altura da barra de botões. O scroll do campo com foco precisa parar acima dela, e a barra
+// sobe junto com o teclado levando a área segura do gesto.
+const FOOTER_HEIGHT = 80;
 
 const STEPS: Record<PersonType, StepId[]> = {
   PF: ['type', 'details', 'address', 'review'],
@@ -65,6 +71,7 @@ function fieldsOf(step: StepId, type: PersonType): readonly string[] {
 
 export default function NewPersonScreen() {
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
   const form = usePersonForm();
 
   const [index, setIndex] = useState(0);
@@ -73,6 +80,7 @@ export default function NewPersonScreen() {
   const [hasContent, setHasContent] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [exitRequest, setExitRequest] = useState<(() => void) | null>(null);
+  const [typeSwitch, setTypeSwitch] = useState<PersonType | null>(null);
 
   // `ready` segura a gravação até o usuário responder, para não sobrescrever o rascunho salvo.
   const [savedDraft] = useState<PersonDraft | null>(() => {
@@ -156,9 +164,28 @@ export default function NewPersonScreen() {
     showToast('Revise os campos marcados em vermelho.');
   }
 
-  function chooseType(next: PersonType) {
-    form.setValue('type', next);
+  // Cada tipo pede campos diferentes, então trocar o tipo é começar outro cadastro. Sem o reset,
+  // contato e endereço do tipo anterior ficavam no formulário.
+  function applyType(next: PersonType) {
+    form.reset(emptyPersonFormValues(next));
+    setIndex(0);
     setTypeChosen(true);
+    setHasContent(false);
+    setTypeSwitch(null);
+  }
+
+  function chooseType(next: PersonType) {
+    if (typeChosen && next === type) {
+      return;
+    }
+
+    if (typeChosen && hasContent) {
+      setTypeSwitch(next);
+
+      return;
+    }
+
+    applyType(next);
   }
 
   async function goNext() {
@@ -208,7 +235,7 @@ export default function NewPersonScreen() {
       setLeaving(true);
       allowExit();
       showToast('Cadastro salvo. Agora anexe os documentos.');
-      router.replace({ pathname: '/person/documents/[id]', params: { id: personId } });
+      router.replace(`/person/documents/${personId}?novo=1`);
     } catch (error) {
       Alert.alert('Não foi possível salvar', String(error));
     } finally {
@@ -218,15 +245,15 @@ export default function NewPersonScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      {/* A rolagem até o campo com foco e a barra acima do teclado vêm do keyboard-controller: o
+          `KeyboardAvoidingView` do React Native não faz nada no Android em edge-to-edge. */}
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        bottomOffset={FOOTER_HEIGHT + insets.bottom}
       >
-        <ScrollView
-          contentContainerClassName="gap-6 p-4 pb-8"
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-        >
+        <View className="gap-6 p-4 pb-8">
           <StepProgress current={index + 1} total={steps.length} label={TITLES[step]} />
 
           {step === 'type' ? (
@@ -244,8 +271,10 @@ export default function NewPersonScreen() {
           {step === 'representative' ? <RepresentativeStep control={form.control} /> : null}
 
           {step === 'review' ? <ReviewStep values={form.watch()} /> : null}
-        </ScrollView>
+        </View>
+      </KeyboardAwareScrollView>
 
+      <KeyboardStickyView>
         <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
           <View className="flex-1">
             <Button label="Voltar" variant="secondary" onPress={goBack} disabled={saving} />
@@ -267,7 +296,7 @@ export default function NewPersonScreen() {
             )}
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardStickyView>
 
       <ConfirmDialog
         visible={pendingDraft !== null}
@@ -281,6 +310,17 @@ export default function NewPersonScreen() {
         cancelLabel="Descartar"
         onConfirm={resumeDraft}
         onCancel={discardDraft}
+      />
+
+      <ConfirmDialog
+        visible={typeSwitch !== null}
+        title={typeSwitch === 'PF' ? 'Trocar para pessoa física?' : 'Trocar para pessoa jurídica?'}
+        message="Os dois tipos pedem campos diferentes, então o que você preencheu até aqui será descartado."
+        confirmLabel="Trocar"
+        cancelLabel="Manter como está"
+        destructive
+        onConfirm={() => typeSwitch && applyType(typeSwitch)}
+        onCancel={() => setTypeSwitch(null)}
       />
 
       <ConfirmDialog

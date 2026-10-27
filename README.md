@@ -33,9 +33,9 @@ As pastas `android/` e `ios/` são geradas (Continuous Native Generation). Elas 
 
 **Rascunho.** O que foi digitado é salvo a cada tecla no MMKV. Fechar o app ou sair da tela no meio do cadastro não perde nada: ao abrir um cadastro novo o app oferece retomar. Sair da tela com conteúdo preenchido pede confirmação, pela seta do header e pelo botão físico do Android.
 
-**Preenchimento automático.** CEP pelo ViaCEP e CNPJ pela BrasilAPI, com timeout de 8 segundos. Sem internet ou com documento não encontrado o app avisa na própria tela e deixa preencher à mão.
+**Preenchimento automático.** No cadastro de empresa o CNPJ é o primeiro campo, porque é ele que preenche o resto: a consulta na BrasilAPI traz razão social, nome fantasia, data de abertura, telefone e endereço, e o que a Receita devolve em branco fica para o usuário digitar. Inscrição estadual não existe nessa API, então é sempre manual. O CEP, digitado ou trazido pelo CNPJ, busca o endereço no ViaCEP. As duas consultas têm timeout de 8 segundos; sem internet ou com documento não encontrado o app avisa na própria tela e deixa preencher à mão. Na edição a consulta só roda se o usuário trocar o documento, para não desfazer correção feita à mão.
 
-**Documentos.** Checklist do que cada tipo exige, com badge de enviado ou faltando por item e status geral no topo. Anexar abre câmera, galeria ou PDF. Limite de 10 MB por arquivo. Abrir usa o preview nativo do sistema. Remover apaga o arquivo do disco junto com o registro.
+**Documentos.** Checklist do que cada tipo exige, com badge de enviado ou faltando por item e status geral no topo. Anexar abre câmera, galeria ou PDF. Limite de 10 MB por arquivo. Abrir usa o preview nativo do sistema. Remover apaga o arquivo do disco junto com o registro. Salvar um cadastro leva direto para esta tela, que avisa que o cadastro foi salvo e tem um botão Concluir para voltar à lista: anexar os documentos na hora é opcional.
 
 **Ficha, edição e exclusão.** A ficha mostra os dados completos com CPF e CNPJ parcialmente ocultos. Editar reaproveita os mesmos componentes do cadastro em uma tela única. Excluir pede confirmação e apaga os arquivos e a pasta do cadastro.
 
@@ -67,6 +67,8 @@ A validação é um schema Zod por tipo de cadastro (`src/features/people/schema
 **Wizard e não formulário único.** São mais de 20 campos. Em etapas o erro aparece perto de onde foi digitado, a validação é por etapa e o progresso fica visível. A edição usa tela única, porque ali o usuário já sabe o que quer mudar e quer chegar direto no campo.
 
 **NativeWind.** Estilo junto do componente, com os tokens de cor e tipografia no `tailwind.config.js`. Fonte Montserrat.
+
+**Teclado com `react-native-keyboard-controller`.** O `KeyboardAvoidingView` do React Native não faz nada no Android em edge-to-edge, que é o padrão do SDK 58: o campo com foco ficava embaixo do teclado e a tela não rolava até ele. O `KeyboardAwareScrollView` rola até o campo e o `KeyboardStickyView` mantém a barra de botões acima do teclado. É a biblioteca que a documentação do Expo indica para esse caso.
 
 **Fora do escopo entregue.** Biometria na abertura e exportação da ficha em PDF estavam no plano e ficaram de fora por prazo. Com elas saíram os módulos nativos sem uso (`expo-local-authentication`, `expo-print`, `expo-sharing`) e as permissões de biometria, para o app não pedir acesso que não usa.
 
@@ -124,10 +126,12 @@ npm test            # jest
 npm run format      # prettier --write
 ```
 
-APK de release:
+APK de release, gerada na máquina:
 
 ```bash
 cd android && ./gradlew assembleRelease
 ```
 
-Sai em `android/app/build/outputs/apk/release/app-release.apk`.
+Sai em `android/app/build/outputs/apk/release/app-release.apk`, assinada com a chave de debug.
+
+O `eas.json` tem os perfis `development` (development client) e `preview` (APK de distribuição interna) para quem preferir construir na nuvem com `bunx eas-cli build --profile preview --platform android`. O perfil `development` ainda pede `npx expo install expo-dev-client`, que não entrou aqui porque a build saiu local o tempo todo.

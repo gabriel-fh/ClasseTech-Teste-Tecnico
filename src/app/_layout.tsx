@@ -13,6 +13,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Suspense, useEffect } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { ToastHost } from '@/components/ui/toast';
 import { DATABASE_NAME, migrateDatabase } from '@/lib/db';
@@ -60,21 +61,23 @@ export default function RootLayout() {
     <Suspense fallback={<LoadingScreen />}>
       <QueryClientProvider client={queryClient}>
         <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDatabase} useSuspense>
-          <Stack
-            screenOptions={{
-              headerShadowVisible: false,
-              headerStyle: { backgroundColor: '#fcfbf8' },
-              headerTintColor: '#163a5c',
-              headerTitleStyle: { fontFamily: 'Montserrat_600SemiBold', fontSize: 18 },
-              contentStyle: { backgroundColor: '#fcfbf8' },
-            }}
-          >
-            <Stack.Screen name="index" options={{ title: 'Cadastros' }} />
-            <Stack.Screen name="person/new" options={{ title: 'Novo cadastro' }} />
-            <Stack.Screen name="person/[id]" options={{ title: 'Ficha' }} />
-            <Stack.Screen name="person/edit/[id]" options={{ title: 'Editar cadastro' }} />
-            <Stack.Screen name="person/documents/[id]" options={{ title: 'Documentos' }} />
-          </Stack>
+          <KeyboardProvider>
+            <Stack
+              screenOptions={{
+                headerShadowVisible: false,
+                headerStyle: { backgroundColor: '#fcfbf8' },
+                headerTintColor: '#163a5c',
+                headerTitleStyle: { fontFamily: 'Montserrat_600SemiBold', fontSize: 18 },
+                contentStyle: { backgroundColor: '#fcfbf8' },
+              }}
+            >
+              <Stack.Screen name="index" options={{ title: 'Cadastros' }} />
+              <Stack.Screen name="person/new" options={{ title: 'Novo cadastro' }} />
+              <Stack.Screen name="person/[id]" options={{ title: 'Ficha' }} />
+              <Stack.Screen name="person/edit/[id]" options={{ title: 'Editar cadastro' }} />
+              <Stack.Screen name="person/documents/[id]" options={{ title: 'Documentos' }} />
+            </Stack>
+          </KeyboardProvider>
           <ToastHost />
         </SQLiteProvider>
       </QueryClientProvider>

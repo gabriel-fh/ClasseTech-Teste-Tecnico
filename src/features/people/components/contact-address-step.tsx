@@ -11,9 +11,15 @@ import type { PersonFormApi } from '../use-person-form';
 
 const UF_OPTIONS = UFS.map((value) => ({ value, label: value }));
 
-export function ContactAddressStep({ form }: { form: PersonFormApi }) {
+export function ContactAddressStep({
+  form,
+  editing = false,
+}: {
+  form: PersonFormApi;
+  editing?: boolean;
+}) {
   const control = form.control;
-  const cep = useCepAutofill(form);
+  const cep = useCepAutofill(form, editing);
 
   return (
     <View className="gap-4">

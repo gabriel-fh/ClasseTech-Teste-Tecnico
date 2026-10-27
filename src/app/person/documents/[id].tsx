@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
@@ -40,8 +40,12 @@ interface Picked {
 }
 
 export default function DocumentsScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, novo } = useLocalSearchParams<{ id: string; novo?: string }>();
   const db = useSQLiteContext();
+
+  // A tela também abre sozinha logo depois de salvar. Nesse caso ela precisa dizer o que houve e
+  // ter uma saída, senão o cadastro termina num beco.
+  const afterSaving = novo === '1';
 
   const [target, setTarget] = useState<DocumentType | null>(null);
   const [removing, setRemoving] = useState<PersonDocument | null>(null);
@@ -238,6 +242,15 @@ export default function DocumentsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper-50" edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-4 p-4 pb-10">
+        {afterSaving ? (
+          <View className="gap-1 rounded-card bg-moss-100 p-4">
+            <Text className="font-body-semibold text-sm text-moss-700">Cadastro salvo</Text>
+            <Text className="font-body text-sm leading-5 text-ink-500">
+              Anexe os documentos agora ou toque em Concluir para deixar para depois.
+            </Text>
+          </View>
+        ) : null}
+
         <View className="gap-2">
           <Text className="font-display text-xl text-ink-900">Documentos exigidos</Text>
           <Badge label={status.label} tone={status.complete ? 'success' : 'warning'} />
@@ -297,6 +310,14 @@ export default function DocumentsScreen() {
           </View>
         ))}
       </ScrollView>
+
+      <View className="border-t border-paper-200 bg-paper-50 p-4">
+        <Button
+          label={afterSaving ? 'Concluir' : 'Voltar para a ficha'}
+          variant={afterSaving ? 'primary' : 'secondary'}
+          onPress={() => (afterSaving ? router.replace('/') : router.back())}
+        />
+      </View>
 
       <ActionSheet
         visible={target !== null}

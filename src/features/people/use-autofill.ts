@@ -21,7 +21,10 @@ function filler(form: PersonFormApi) {
   };
 }
 
-export function useCepAutofill(form: PersonFormApi): AutofillState {
+// `editing` marca a tela que abre com um cadastro salvo. Só lá o valor que já está no formulário
+// entra como aplicado, para a consulta não trocar o que foi corrigido à mão. No cadastro novo a
+// busca precisa rodar mesmo quando o CEP chega pronto da consulta de CNPJ.
+export function useCepAutofill(form: PersonFormApi, editing = false): AutofillState {
   // `form.watch` só re-renderiza quem chamou `useForm`; num filho, quem assina é `useWatch`.
   const cep = useWatch({ control: form.control, name: 'cep' });
   const digits = onlyDigits(cep ?? '');
@@ -36,9 +39,7 @@ export function useCepAutofill(form: PersonFormApi): AutofillState {
   });
 
   const address = query.data ?? null;
-  // No cadastro novo o campo chega vazio; na edição ele já vem preenchido. Marcar o valor inicial
-  // como aplicado evita que a consulta sobrescreva o endereço corrigido à mão.
-  const applied = useRef<string | null>(enabled ? digits : null);
+  const applied = useRef<string | null>(editing && enabled ? digits : null);
 
   useEffect(() => {
     if (!address || applied.current === digits) {
@@ -62,7 +63,7 @@ export function useCepAutofill(form: PersonFormApi): AutofillState {
   };
 }
 
-export function useCnpjAutofill(form: PersonFormApi): AutofillState {
+export function useCnpjAutofill(form: PersonFormApi, editing = false): AutofillState {
   const raw = useWatch({ control: form.control, name: 'cnpj' }) ?? '';
   const normalized = normalizeCnpj(raw);
   const enabled = isValidCnpj(raw) && /^\d{14}$/.test(normalized);
@@ -75,10 +76,10 @@ export function useCnpjAutofill(form: PersonFormApi): AutofillState {
     retry: false,
   });
 
+  // Mesma regra do CEP: abrir a edição de uma empresa já salva não pode trocar o que está na
+  // ficha pelo que a Receita devolve agora.
   const company = query.data ?? null;
-  // Mesma regra do CEP: abrir a edição de uma empresa já salva não pode trocar o que está na ficha
-  // pelo que a Receita devolve agora.
-  const applied = useRef<string | null>(enabled ? normalized : null);
+  const applied = useRef<string | null>(editing && enabled ? normalized : null);
 
   useEffect(() => {
     if (!company || applied.current === normalized) {

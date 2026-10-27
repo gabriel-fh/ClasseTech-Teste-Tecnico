@@ -2,16 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, type ReactNode } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, Text, View } from 'react-native';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -26,6 +19,10 @@ import { toPersonFormValues, toPersonInput, type PersonFormValues } from '@/feat
 import type { Person } from '@/features/people/types';
 import { usePersonForm } from '@/features/people/use-person-form';
 
+// Altura da barra de botões. O scroll do campo com foco precisa parar acima dela, e a barra
+// sobe junto com o teclado levando a área segura do gesto.
+const FOOTER_HEIGHT = 80;
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View className="gap-4">
@@ -39,6 +36,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function EditForm({ id, person }: { id: string; person: Person }) {
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
   const form = usePersonForm(toPersonFormValues(person));
   const [saving, setSaving] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -78,51 +76,53 @@ function EditForm({ id, person }: { id: string; person: Person }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerClassName="gap-7 p-4 pb-8"
+    <>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        bottomOffset={FOOTER_HEIGHT + insets.bottom}
       >
-        <Section title={person.type === 'PF' ? 'Dados pessoais' : 'Dados da empresa'}>
-          {person.type === 'PF' ? (
-            <IndividualDetailsStep control={form.control} />
-          ) : (
-            <CompanyDetailsStep form={form} />
-          )}
-        </Section>
-
-        <Section title="Contato e endereço">
-          <ContactAddressStep form={form} />
-        </Section>
-
-        {person.type === 'PJ' ? (
-          <Section title="Representante legal">
-            <RepresentativeStep control={form.control} />
+        <View className="gap-7 p-4 pb-8">
+          <Section title={person.type === 'PF' ? 'Dados pessoais' : 'Dados da empresa'}>
+            {person.type === 'PF' ? (
+              <IndividualDetailsStep control={form.control} />
+            ) : (
+              <CompanyDetailsStep form={form} editing />
+            )}
           </Section>
-        ) : null}
-      </ScrollView>
 
-      <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
-        <View className="flex-1">
-          <Button
-            label="Cancelar"
-            variant="secondary"
-            onPress={() => (form.formState.isDirty ? setLeaving(true) : router.back())}
-            disabled={saving}
-          />
+          <Section title="Contato e endereço">
+            <ContactAddressStep form={form} editing />
+          </Section>
+
+          {person.type === 'PJ' ? (
+            <Section title="Representante legal">
+              <RepresentativeStep control={form.control} />
+            </Section>
+          ) : null}
         </View>
-        <View className="flex-[2]">
-          <Button
-            label="Salvar alterações"
-            loading={saving}
-            onPress={() => void form.handleSubmit(save, reportInvalid)()}
-          />
+      </KeyboardAwareScrollView>
+
+      <KeyboardStickyView>
+        <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
+          <View className="flex-1">
+            <Button
+              label="Cancelar"
+              variant="secondary"
+              onPress={() => (form.formState.isDirty ? setLeaving(true) : router.back())}
+              disabled={saving}
+            />
+          </View>
+          <View className="flex-[2]">
+            <Button
+              label="Salvar alterações"
+              loading={saving}
+              onPress={() => void form.handleSubmit(save, reportInvalid)()}
+            />
+          </View>
         </View>
-      </View>
+      </KeyboardStickyView>
 
       <ConfirmDialog
         visible={leaving}
@@ -137,7 +137,7 @@ function EditForm({ id, person }: { id: string; person: Person }) {
         }}
         onCancel={() => setLeaving(false)}
       />
-    </KeyboardAvoidingView>
+    </>
   );
 }
 
@@ -145,9 +145,13 @@ export default function EditPersonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
 
+  // `gcTime: 0` joga fora o cache ao sair da tela. Sem isso, salvar e entrar de novo na edição
+  // mostrava o valor antigo, porque o cache do React Query não sabe da gravação no SQLite.
   const query = useQuery({
     queryKey: ['person-form', id],
     queryFn: () => getPerson(db, id),
+    staleTime: 0,
+    gcTime: 0,
   });
 
   if (query.isPending) {
