@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.gabrielfh.cadastroclassetech"
+      "package": "com.gabrielfh.cadastroclassetech",
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "server",
@@ -35,7 +36,21 @@
           "imageWidth": 76
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O app usa a câmera para fotografar os documentos do cadastro.",
+          "photosPermission": "O app acessa a galeria para anexar documentos ao cadastro."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "O app usa a biometria para destravar os cadastros."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -166,9 +166,10 @@ export default function NewPersonScreen() {
         return;
       }
 
-      await createPerson(db, input);
+      const personId = await createPerson(db, input);
+
       clearDraft();
-      router.back();
+      router.replace({ pathname: '/person/documents/[id]', params: { id: personId } });
     } catch (error) {
       Alert.alert('Não foi possível salvar', String(error));
     } finally {

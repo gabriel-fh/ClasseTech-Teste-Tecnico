@@ -11,6 +11,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { listDocuments } from '@/features/documents/repository';
 import { calculateDocumentationStatus } from '@/features/documents/types';
+import { removeFiles, removePersonFolder } from '@/features/documents/files';
 import { deletePerson, getPerson } from '@/features/people/repository';
 import {
   MARITAL_STATUS_LABELS,
@@ -123,7 +124,10 @@ export default function PersonDetailScreen() {
     setDeleting(true);
 
     try {
-      await deletePerson(db, id);
+      const files = await deletePerson(db, id);
+
+      removeFiles(files);
+      removePersonFolder(id);
       setConfirming(false);
       router.back();
     } catch (error) {
@@ -192,15 +196,22 @@ export default function PersonDetailScreen() {
         ))}
       </ScrollView>
 
-      <View className="flex-row gap-3 border-t border-paper-200 bg-paper-50 p-4">
-        <View className="flex-1">
-          <Button label="Excluir" variant="danger" onPress={() => setConfirming(true)} />
-        </View>
-        <View className="flex-[2]">
-          <Button
-            label="Editar"
-            onPress={() => router.push({ pathname: '/person/edit/[id]', params: { id } })}
-          />
+      <View className="gap-2 border-t border-paper-200 bg-paper-50 p-4">
+        <Button
+          label="Documentos"
+          onPress={() => router.push({ pathname: '/person/documents/[id]', params: { id } })}
+        />
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Button label="Excluir" variant="danger" onPress={() => setConfirming(true)} />
+          </View>
+          <View className="flex-[2]">
+            <Button
+              label="Editar"
+              variant="secondary"
+              onPress={() => router.push({ pathname: '/person/edit/[id]', params: { id } })}
+            />
+          </View>
         </View>
       </View>
 

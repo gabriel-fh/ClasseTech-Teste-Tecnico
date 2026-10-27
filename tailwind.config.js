@@ -44,11 +44,11 @@ module.exports = {
         },
       },
       fontFamily: {
-        display: ['Fraunces_700Bold'],
-        'display-medium': ['Fraunces_600SemiBold'],
-        body: ['Archivo_400Regular'],
-        'body-medium': ['Archivo_500Medium'],
-        'body-semibold': ['Archivo_600SemiBold'],
+        display: ['Montserrat_700Bold'],
+        'display-medium': ['Montserrat_600SemiBold'],
+        body: ['Montserrat_400Regular'],
+        'body-medium': ['Montserrat_500Medium'],
+        'body-semibold': ['Montserrat_600SemiBold'],
       },
       borderRadius: {
         field: '10px',

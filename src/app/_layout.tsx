@@ -1,11 +1,11 @@
 import '@/global.css';
 
 import {
-  Archivo_400Regular,
-  Archivo_500Medium,
-  Archivo_600SemiBold,
-} from '@expo-google-fonts/archivo';
-import { Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
+  Montserrat_400Regular,
+  Montserrat_500Medium,
+  Montserrat_600SemiBold,
+  Montserrat_700Bold,
+} from '@expo-google-fonts/montserrat';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -39,11 +39,10 @@ function LoadingScreen() {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Archivo_400Regular,
-    Archivo_500Medium,
-    Archivo_600SemiBold,
-    Fraunces_600SemiBold,
-    Fraunces_700Bold,
+    Montserrat_400Regular,
+    Montserrat_500Medium,
+    Montserrat_600SemiBold,
+    Montserrat_700Bold,
   });
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export default function RootLayout() {
               headerShadowVisible: false,
               headerStyle: { backgroundColor: '#fcfbf8' },
               headerTintColor: '#163a5c',
-              headerTitleStyle: { fontFamily: 'Fraunces_600SemiBold', fontSize: 18 },
+              headerTitleStyle: { fontFamily: 'Montserrat_600SemiBold', fontSize: 18 },
               contentStyle: { backgroundColor: '#fcfbf8' },
             }}
           >
@@ -73,6 +72,7 @@ export default function RootLayout() {
             <Stack.Screen name="person/new" options={{ title: 'Novo cadastro' }} />
             <Stack.Screen name="person/[id]" options={{ title: 'Ficha' }} />
             <Stack.Screen name="person/edit/[id]" options={{ title: 'Editar cadastro' }} />
+            <Stack.Screen name="person/documents/[id]" options={{ title: 'Documentos' }} />
           </Stack>
         </SQLiteProvider>
       </QueryClientProvider>
