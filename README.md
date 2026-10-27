@@ -1,124 +1,79 @@
 # Cadastro ClasseTech
 
-App Android de cadastro de pessoa física e jurídica para o contexto de imobiliária: locadores, locatários e fiadores. Tudo fica no aparelho. Os cadastros vão para um SQLite local e os documentos são copiados para a pasta privada do app; o banco guarda só o caminho do arquivo.
+App Android de cadastro de pessoa física e jurídica para imobiliária: locadores, locatários e fiadores. Tudo fica no aparelho, sem servidor. Os cadastros vão para um SQLite local e os documentos são copiados para a pasta privada do app.
 
-Teste técnico. Expo SDK 58, React Native 0.88, React 19.3, TypeScript estrito, Expo Router.
+Teste técnico.
 
-## Instalar o APK
+## Stack
 
-1. Baixe `app-release.apk` no celular.
-2. Abra o arquivo. O Android vai pedir para liberar a instalação de fontes desconhecidas para o app que abriu o arquivo (WhatsApp, navegador ou gerenciador de arquivos). Libere e volte.
-3. Confirme a instalação.
+| Para que               | O que                                                          |
+| ---------------------- | -------------------------------------------------------------- |
+| App                    | Expo SDK 58, React Native 0.88, React 19.3, TypeScript estrito |
+| Navegação              | Expo Router (rotas por arquivo em `src/app`)                   |
+| Formulário             | react-hook-form + zod, pelo `@hookform/resolvers`              |
+| Banco                  | expo-sqlite                                                    |
+| Rascunho do formulário | react-native-mmkv                                              |
+| Consultas externas     | TanStack Query, ViaCEP e BrasilAPI                             |
+| Arquivos               | expo-image-picker, expo-document-picker, expo-file-system      |
+| Estilo                 | NativeWind (Tailwind), fonte Montserrat                        |
+| Teclado                | react-native-keyboard-controller                               |
+| Qualidade              | ESLint, Prettier, Jest                                         |
 
-A APK é assinada com chave de debug, não com chave de publicação. Serve para testar, não para subir na Play Store.
-
-Permissões: câmera (pedida na primeira foto) e internet (busca de CEP e CNPJ). A galeria usa o seletor de fotos do sistema, que não exige permissão de armazenamento.
-
-## Rodar do código
+## Rodar
 
 ```bash
 npm install
 npx expo run:android
 ```
 
-`npx expo start` sozinho não serve: o app usa `react-native-mmkv`, que tem código nativo e não roda no Expo Go. Precisa de development build.
+`npx expo start` sozinho não serve: o app usa módulos nativos (MMKV, SQLite, câmera) e precisa de development build. As pastas `android/` e `ios/` são geradas e não estão no repositório; configuração nativa fica no `app.json`.
 
-As pastas `android/` e `ios/` são geradas (Continuous Native Generation). Elas não estão no repositório; `expo run:android` gera a primeira vez. Configuração nativa fica em `app.json`.
+## Instalar o APK
+
+Gerar na máquina:
+
+```bash
+cd android && ./gradlew assembleRelease
+```
+
+Sai em `android/app/build/outputs/apk/release/app-release.apk`, assinada com chave de debug. No celular, libere a instalação de fontes desconhecidas para o app que abrir o arquivo.
+
+O `eas.json` tem os perfis `development` e `preview` para quem preferir construir na nuvem.
 
 ## O que o app faz
 
-**Lista.** Busca por nome, razão social, CPF ou CNPJ, filtro por tipo e filtro de documentação pendente. Cada cartão mostra nome, documento mascarado, cidade e o status da documentação.
+- Lista com busca por nome, razão social, CPF ou CNPJ, filtro por tipo e filtro de documentação pendente
+- Cadastro em etapas: tipo, dados principais, contato e endereço, representante legal (só PJ) e revisão
+- Rascunho salvo a cada tecla; ao abrir um cadastro novo o app oferece retomar
+- Ficha com os dados completos, edição e exclusão
+- Checklist de documentos por tipo, anexando por câmera, galeria ou PDF
 
-**Cadastro em etapas.** Tipo, dados principais, contato e endereço, representante legal (só PJ) e revisão. Cada etapa valida os próprios campos antes de liberar o Continuar. A revisão mostra tudo antes de gravar.
+## Decisões técnicas
 
-**Rascunho.** O que foi digitado é salvo a cada tecla no MMKV. Fechar o app ou sair da tela no meio do cadastro não perde nada: ao abrir um cadastro novo o app oferece retomar. Sair da tela com conteúdo preenchido pede confirmação, pela seta do header e pelo botão físico do Android.
+**SQLite e não AsyncStorage.** Os dados são relacionais: pessoa tem representante legal e vários documentos. Com SQLite a unicidade de CPF e CNPJ é restrição do banco, a exclusão em cascata apaga representante e documentos sem código extra, e busca com filtro é query em vez de `filter` em memória. Três tabelas: `people`, `representatives` e `documents`.
 
-**Preenchimento automático.** No cadastro de empresa o CNPJ é o primeiro campo: a consulta na BrasilAPI traz razão social, nome fantasia e data de abertura, e o que a Receita devolve em branco fica para o usuário digitar. Inscrição estadual não existe nessa API, então é sempre manual.
+**Arquivo no disco, caminho no banco.** Documento anexado é copiado para `Paths.document/documents/<id>` e o banco guarda só o caminho. Limite de 10 MB por arquivo. Excluir o cadastro apaga os arquivos junto.
 
-A consulta do CNPJ **não** preenche contato e endereço, embora a Receita devolva os dois. A etapa de contato e endereço de um cadastro novo tem que começar vazia, sempre: endereço de empresa costuma ser o do dono, e ver a etapa inteira preenchida sozinha parece que o app trouxe sobra do cadastro anterior. O endereço entra pelo CEP, do mesmo jeito nos dois tipos.
+**react-hook-form com zod.** Um schema por tipo de cadastro e um resolver que escolhe o schema conforme PF ou PJ. O erro aparece em vermelho embaixo do campo, na saída do campo (`mode: 'onTouched'`) e a cada tecla depois da primeira tentativa de envio. CPF e CNPJ são conferidos pelo dígito verificador, não só pelo tamanho, e o CNPJ aceita o formato alfanumérico novo. Máscara na digitação de CPF, CNPJ, CEP, telefone e datas; o banco guarda só os dígitos.
 
-O CEP busca no ViaCEP ao completar 8 dígitos. As duas consultas têm timeout de 8 segundos; sem internet ou com documento não encontrado o app avisa na própria tela e deixa preencher à mão. Na edição a consulta só roda se o usuário trocar o documento, para não desfazer correção feita à mão.
+**Rascunho em MMKV.** O formulário é longo e cadastro de locatário acontece em pé, na vistoria, com interrupção. MMKV é síncrono, então ler na abertura não pisca e escrever a cada tecla não trava a digitação.
 
-**Documentos.** Checklist do que cada tipo exige, com badge de enviado ou faltando por item e status geral no topo. Anexar abre câmera, galeria ou PDF. Limite de 10 MB por arquivo. Abrir usa o preview nativo do sistema. Remover apaga o arquivo do disco junto com o registro. Salvar um cadastro leva direto para esta tela, que avisa que o cadastro foi salvo e tem um botão Concluir para voltar à lista: anexar os documentos na hora é opcional.
+**Wizard e não formulário único.** São mais de 20 campos. Em etapas o erro aparece perto de onde foi digitado e a validação é por etapa. A edição usa tela única, porque ali o usuário já sabe o que quer mudar.
 
-**Ficha, edição e exclusão.** A ficha mostra os dados completos com CPF e CNPJ parcialmente ocultos. Editar reaproveita os mesmos componentes do cadastro em uma tela única. Excluir pede confirmação e apaga os arquivos e a pasta do cadastro.
+**Consulta de CNPJ não preenche endereço.** A BrasilAPI devolve o endereço da empresa, mas empresa costuma estar registrada no endereço do dono, e ver a etapa de contato preenchida sozinha parece sobra do cadastro anterior. A consulta traz razão social, nome fantasia e data de abertura; o endereço entra pelo CEP, igual nos dois tipos.
 
-## Validação
-
-A validação é um schema Zod por tipo de cadastro (`src/features/people/schema.ts`), ligado ao react-hook-form por um resolver que escolhe o schema conforme o tipo escolhido na primeira etapa. O erro aparece em vermelho embaixo do input, com a borda do campo em vermelho, e substitui a dica do campo enquanto existir.
-
-- **Obrigatório.** Campo vazio ou só com espaços é barrado. Sem campo obrigatório preenchido não se passa de etapa.
-- **Quando o erro aparece.** Na saída do campo (`onTouched`) e, depois da primeira tentativa de envio, a cada tecla. Tentar avançar de etapa valida todos os campos dela de uma vez e leva o foco para o primeiro inválido.
-- **Dígito verificador.** CPF e CNPJ são conferidos de verdade, não só pelo tamanho. O CNPJ aceita o formato alfanumérico que entra em vigor em 2026. Sequência repetida (`111.111.111-11`) é rejeitada.
-- **Duplicado.** CPF e CNPJ são únicos no banco. Salvar um documento que já existe mostra o erro no próprio campo e volta para a etapa dos dados.
-- **Máscara na digitação.** CPF, CNPJ, CEP, telefone (fixo e celular) e datas são mascarados enquanto se digita, com `maxLength` no tamanho da máscara. O banco guarda só os dígitos; a máscara volta na leitura.
-- **Sem máscara, de propósito.** RG e inscrição estadual mudam de formato conforme o estado, e ISENTO é valor válido para inscrição estadual. Máscara ali rejeitaria dado legítimo, então os dois são texto livre, com o limite de tamanho e a dica explicando o formato.
-- **Data.** Rejeita data que não existe (`31/02`), exige maior de 18 anos no nascimento, rejeita ano implausível e não aceita data de abertura no futuro.
-- **E-mail, telefone, CEP e UF.** E-mail por formato, telefone com 10 ou 11 dígitos, CEP com 8, UF conferida contra a lista das 27.
-- **Tamanho.** Cada campo tem limite (`FIELD_LIMITS`). O `maxLength` do input corta na digitação e o schema barra o que chega colado ou de um rascunho antigo, usando a mesma tabela.
-- **Envio inválido.** Se sobrar erro ao salvar, o app mostra um toast e volta para a etapa que tem o campo errado. Botão que não faz nada é pior que erro na tela.
-
-`npx jest` cobre validadores, máscaras, schema, rascunho, repositório e checklist de documentos: 7 arquivos, 80 casos.
-
-## Decisões
-
-**SQLite e não AsyncStorage.** Os dados são relacionais: pessoa tem representante legal e vários documentos. Com SQLite a unicidade de CPF e CNPJ é restrição do banco, a exclusão em cascata apaga representante e documentos sem código extra, e a busca com filtro é uma query em vez de um `filter` em memória.
-
-**Arquivo no disco, caminho no banco.** Documento anexado é copiado para `Paths.document/documents/<id do cadastro>` e o banco guarda o caminho. Guardar o conteúdo em blob inflaria o banco e deixaria a lista lenta por nada.
-
-**Rascunho em MMKV.** O formulário é longo e cadastro de locatário acontece em pé, na vistoria, com interrupção. MMKV é síncrono, então ler na abertura da tela não pisca e escrever a cada tecla não trava a digitação.
-
-**Wizard e não formulário único.** São mais de 20 campos. Em etapas o erro aparece perto de onde foi digitado, a validação é por etapa e o progresso fica visível. A edição usa tela única, porque ali o usuário já sabe o que quer mudar e quer chegar direto no campo.
-
-**NativeWind.** Estilo junto do componente, com os tokens de cor e tipografia no `tailwind.config.js`. Fonte Montserrat.
-
-**Teclado com `react-native-keyboard-controller`.** O `KeyboardAvoidingView` do React Native não faz nada no Android em edge-to-edge, que é o padrão do SDK 58: o campo com foco ficava embaixo do teclado e a tela não rolava até ele. O `KeyboardAwareScrollView` rola até o campo e o `KeyboardStickyView` mantém a barra de botões acima do teclado. É a biblioteca que a documentação do Expo indica para esse caso.
-
-**Fora do escopo entregue.** Biometria na abertura e exportação da ficha em PDF estavam no plano e ficaram de fora por prazo. Com elas saíram os módulos nativos sem uso (`expo-local-authentication`, `expo-print`, `expo-sharing`) e as permissões de biometria, para o app não pedir acesso que não usa.
-
-## Campos e o motivo
-
-O cadastro representa quem assina contrato de locação, então o critério foi: só entra campo que aparece em contrato, em ficha de análise de crédito ou na cobrança.
-
-**Pessoa física.** Nome completo, CPF, RG com órgão emissor, data de nascimento, estado civil, profissão e nacionalidade. RG e órgão emissor porque a qualificação das partes no contrato pede os dois. Estado civil porque muda quem precisa assinar: cônjuge de locador casado costuma ser anuente, e união estável aparece na lista por isso. Profissão porque entra na análise de renda. Maior de 18 porque menor não assina contrato de locação sozinho.
-
-**Pessoa jurídica.** Razão social, nome fantasia, CNPJ, inscrição estadual, data de abertura e representante legal com nome, CPF, cargo, e-mail e telefone. Razão social é o nome do contrato e nome fantasia é como a imobiliária reconhece o cliente, então os dois ficam. Inscrição estadual é opcional porque empresa de serviço não tem. O representante legal é obrigatório: sem saber quem assina pela empresa o contrato não fecha.
-
-**Contato e endereço.** E-mail e telefone, mais CEP, logradouro, número, complemento, bairro, cidade e UF. Endereço completo e separado porque é o que vai no contrato e o que a cobrança usa. O número aceita S/N.
-
-**Documentos exigidos.** PF: identidade, comprovante de residência e comprovante de renda. PJ: contrato social, cartão CNPJ, comprovante de endereço da empresa e identidade do representante. É o conjunto que uma imobiliária pede para análise, e o status da documentação na lista existe para achar rápido o cadastro que está parado esperando papel.
-
-## Limites conhecidos
-
-- Só Android. Não houve máquina macOS para gerar e testar iOS, e entregar iOS sem rodar em aparelho seria entregar no escuro.
-- Tela travada em retrato.
-- Sem sincronização: dois aparelhos não compartilham cadastro.
-- Documentos ficam na pasta privada do app, sem criptografia em repouso.
-- `android/` é gerado. Regerar com `expo prebuild --clean` descarta ajuste feito à mão nessa pasta.
-
-## Com mais tempo
-
-- Sincronização com API, com fila de envio e resolução de conflito, para o cadastro feito na rua subir sozinho quando a conexão voltar.
-- Criptografia dos documentos em repouso e biometria na abertura. São RG, comprovante de renda e contrato social no aparelho de quem faz vistoria na rua.
-- Teste E2E do fluxo de cadastro em aparelho, com Maestro.
-- Versão iOS.
-- Exportação da ficha em PDF para anexar no processo de análise.
+**Teclado com `react-native-keyboard-controller`.** O `KeyboardAvoidingView` do React Native não faz nada no Android em edge-to-edge, que é o padrão do SDK 58. O `KeyboardAwareScrollView` rola até o campo com foco e reserva embaixo a altura do teclado, então dá para rolar o que fica atrás dele.
 
 ## Estrutura
 
 ```
 src/
-  app/                      rotas do Expo Router
-    index.tsx               lista com busca e filtros
-    person/new.tsx          cadastro em etapas
-    person/[id].tsx         ficha
-    person/edit/[id].tsx    edição
-    person/documents/[id].tsx  checklist de documentos
-  components/ui/            botão, campo, select, toast, diálogo, badge
-  components/form/          ligação dos campos com o react-hook-form
-  features/people/          schema, repositório, rascunho, etapas do wizard
-  features/documents/       tipos exigidos, repositório, arquivos no disco
-  lib/                      banco, validadores, máscaras, clientes de CEP e CNPJ
+  app/                  rotas do Expo Router
+  components/ui/        botão, campo, select, toast, diálogo, badge
+  components/form/      ligação dos campos com o react-hook-form
+  features/people/      schema, repositório, rascunho, etapas do wizard
+  features/documents/   tipos exigidos, repositório, arquivos no disco
+  lib/                  banco, validadores, máscaras, clientes de CEP e CNPJ
 ```
 
 ## Comandos
@@ -130,12 +85,6 @@ npm test            # jest
 npm run format      # prettier --write
 ```
 
-APK de release, gerada na máquina:
+## Fora do escopo entregue
 
-```bash
-cd android && ./gradlew assembleRelease
-```
-
-Sai em `android/app/build/outputs/apk/release/app-release.apk`, assinada com a chave de debug.
-
-O `eas.json` tem os perfis `development` (development client) e `preview` (APK de distribuição interna) para quem preferir construir na nuvem com `bunx eas-cli build --profile preview --platform android`. O perfil `development` ainda pede `npx expo install expo-dev-client`, que não entrou aqui porque a build saiu local o tempo todo.
+Biometria na abertura e exportação da ficha em PDF estavam no plano e ficaram de fora por prazo. O app é só Android: não houve máquina macOS para gerar e testar iOS. A tela fica travada em retrato e não há sincronização com servidor.
