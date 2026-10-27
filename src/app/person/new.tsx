@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router, usePreventRemove } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
@@ -70,6 +71,7 @@ function fieldsOf(step: StepId, type: PersonType): readonly string[] {
 
 export default function NewPersonScreen() {
   const db = useSQLiteContext();
+  const queryClient = useQueryClient();
   const form = usePersonForm();
 
   const [index, setIndex] = useState(0);
@@ -229,6 +231,9 @@ export default function NewPersonScreen() {
 
       const personId = await createPerson(db, input);
 
+      // A lista tem uma chave de cache por filtro. Invalidar todas evita abrir um filtro e ver a
+      // lista sem o cadastro recém-criado.
+      void queryClient.invalidateQueries({ queryKey: ['people'] });
       clearDraft();
       setLeaving(true);
       allowExit();

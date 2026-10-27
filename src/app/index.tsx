@@ -23,9 +23,13 @@ export default function HomeScreen() {
 
   const filters: PersonFilters = { search, type, onlyPending };
 
+  // Cada combinação de busca e filtro é uma chave própria no cache, e o `staleTime` padrão do app
+  // é infinito. Sem isto, ligar um filtro mostrava a lista de quando aquele filtro foi usado pela
+  // última vez. Ler de novo o SQLite local não custa nada.
   const query = useQuery({
     queryKey: ['people', search, type, onlyPending],
     queryFn: () => listPeople(db, filters),
+    staleTime: 0,
   });
 
   const { refetch } = query;

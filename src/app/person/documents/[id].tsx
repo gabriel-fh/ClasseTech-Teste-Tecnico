@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
@@ -42,6 +42,7 @@ interface Picked {
 export default function DocumentsScreen() {
   const { id, novo } = useLocalSearchParams<{ id: string; novo?: string }>();
   const db = useSQLiteContext();
+  const queryClient = useQueryClient();
 
   // A tela também abre sozinha logo depois de salvar. Nesse caso ela precisa dizer o que houve e
   // ter uma saída, senão o cadastro termina num beco.
@@ -91,6 +92,9 @@ export default function DocumentsScreen() {
       });
 
       await refetch();
+      // O anexo muda o status da documentação, que a lista mostra no card e usa no filtro.
+      void queryClient.invalidateQueries({ queryKey: ['people'] });
+      void queryClient.invalidateQueries({ queryKey: ['person', id] });
       showToast('Documento anexado.');
     } catch (error) {
       Alert.alert('Não foi possível anexar', String(error));
@@ -205,6 +209,8 @@ export default function DocumentsScreen() {
 
       setRemoving(null);
       await refetch();
+      void queryClient.invalidateQueries({ queryKey: ['people'] });
+      void queryClient.invalidateQueries({ queryKey: ['person', id] });
       showToast('Documento removido.');
     } catch (error) {
       Alert.alert('Não foi possível remover', String(error));

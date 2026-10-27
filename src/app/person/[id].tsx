@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
@@ -90,6 +90,7 @@ function sectionsFor(person: Person): { title: string; rows: Row[] }[] {
 export default function PersonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
+  const queryClient = useQueryClient();
 
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -129,6 +130,8 @@ export default function PersonDetailScreen() {
 
       removeFiles(files);
       removePersonFolder(id);
+      void queryClient.invalidateQueries({ queryKey: ['people'] });
+      queryClient.removeQueries({ queryKey: ['person', id] });
       setConfirming(false);
       showToast('Cadastro excluído.');
       router.back();

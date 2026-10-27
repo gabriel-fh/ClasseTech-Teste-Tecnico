@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, type ReactNode } from 'react';
@@ -35,6 +35,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function EditForm({ id, person }: { id: string; person: Person }) {
   const db = useSQLiteContext();
+  const queryClient = useQueryClient();
   const form = usePersonForm(toPersonFormValues(person));
   const [saving, setSaving] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -64,6 +65,9 @@ function EditForm({ id, person }: { id: string; person: Person }) {
       }
 
       await updatePerson(db, id, input);
+
+      void queryClient.invalidateQueries({ queryKey: ['people'] });
+      void queryClient.invalidateQueries({ queryKey: ['person', id] });
       showToast('Alterações salvas.');
       router.back();
     } catch (error) {
